@@ -18,13 +18,10 @@ public class Role {
     private Integer id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="roleType")
+    @Column(name="role_type")
     private RoleType roleType;
 
     @ManyToMany(mappedBy = "roles")
     @JsonIgnore
     private List<User> users;
-
-
-
 }
