@@ -3,7 +3,9 @@ package com.project.practice.sap.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,24 +13,26 @@ import java.util.List;
 @Entity
 @Table(name="users")
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
-    @Id //all tables in DB need a primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) //auto generates id
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
     private Integer id;
 
-    @Column(name="username")
+
+    @Column(name="username", unique = true, nullable = false)
     private String username;
 
     @Column(name="email", unique = true, nullable = false)
     private String email;
 
-    @Column(name="passwordHash")
+    @Column(name="password_hash", nullable = false)
     private String passwordHash;
 
     @CreatedDate
-    @Column(name="createdAt", nullable = false, updatable = false)
+    @Column(name="created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @JsonIgnore
@@ -39,4 +43,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name="role_id")
     )    private List<Role> roles;
 
+    @OneToMany(mappedBy = "createdBy")
+    @ToString.Exclude // lombok issue to be addressed later
+    private List<Document> documents;
 }
