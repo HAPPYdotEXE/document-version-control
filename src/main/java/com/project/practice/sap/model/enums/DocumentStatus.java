@@ -1,8 +1,8 @@
 package com.project.practice.sap.model.enums;
 
 public enum DocumentStatus {
-     DRAFT,
-    UNDER_REVIEW,
+     UNDER_REVIEW,
+    REJECTED,
     APPROVED,
     ARCHIVED
 }
