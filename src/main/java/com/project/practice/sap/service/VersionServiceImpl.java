@@ -1,7 +1,7 @@
 package com.project.practice.sap.service;
 
 import com.project.practice.sap.dto.ApproveVersionRequest;
-import com.project.practice.sap.dto.UserResponseDTO;
+import com.project.practice.sap.dto.UserSummaryDTO;
 import com.project.practice.sap.dto.VersionResponseDTO;
 import com.project.practice.sap.exception.InvalidFileException;
 import com.project.practice.sap.exception.ResourceNotFoundException;
@@ -49,6 +49,13 @@ public class VersionServiceImpl implements VersionService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        // only one version can be pending review at a time
+        if (versionRepository.existsByDocumentIdAndStatus(documentId, DocumentStatus.UNDER_REVIEW)) {
+            throw new IllegalStateException(
+                    "A version is already pending review for this document. " +
+                    "It must be approved or rejected before a new version can be uploaded.");
+        }
 
         // Calculate next version number: count existing versions + 1
         int nextVersionNum = versionRepository.countByDocumentId(documentId) + 1;
@@ -197,16 +204,9 @@ public class VersionServiceImpl implements VersionService {
         }
     }
 
-    private UserResponseDTO userToDTO(User user) {
+    private UserSummaryDTO toUserSummary(User user) {
         if (user == null) return null;
-        UserResponseDTO response = new UserResponseDTO(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getRoles(),
-                user.getCreatedAt()
-        );
-        return response;
+        return new UserSummaryDTO(user.getId(), user.getUsername());
     }
 
     private VersionResponseDTO toDTO(Version version) {
@@ -217,9 +217,9 @@ public class VersionServiceImpl implements VersionService {
                 version.isActive(),
                 version.getFilePath(),
                 version.getCreatedAt(),
-                userToDTO(version.getCreatedBy()),
-                userToDTO(version.getReviewedBy()),   // null until reviewed
-                version.getReviewComment(),            // null until reviewed
+                toUserSummary(version.getCreatedBy()),
+                toUserSummary(version.getReviewedBy()),   // null until reviewed
+                version.getReviewComment(),                // null until reviewed
                 version.getDocument().getId()
         );
     }

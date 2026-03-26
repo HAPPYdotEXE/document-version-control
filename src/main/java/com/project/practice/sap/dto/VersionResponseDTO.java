@@ -5,14 +5,14 @@ import com.project.practice.sap.model.enums.DocumentStatus;
 import java.time.LocalDateTime;
 
 public record VersionResponseDTO(
-    Integer id,
-    String versionNum,
-    DocumentStatus status,
-    boolean isActive,
-    String filePath,
-    LocalDateTime createdAt,
-    UserResponseDTO createdBy,
-    UserResponseDTO reviewedBy,   // nullable
-    String reviewComment,      // nullable
-    Integer documentId
-){}
+        Integer id,
+        String versionNum,
+        DocumentStatus status,
+        boolean isActive,
+        String filePath,
+        LocalDateTime createdAt,
+        UserSummaryDTO createdBy,
+        UserSummaryDTO reviewedBy,    // null until a reviewer acts
+        String reviewComment,          // null until a reviewer acts
+        Integer documentId
+) {}

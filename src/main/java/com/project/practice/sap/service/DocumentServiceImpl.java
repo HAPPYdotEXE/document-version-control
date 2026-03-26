@@ -1,7 +1,7 @@
 package com.project.practice.sap.service;
 
 import com.project.practice.sap.dto.DocumentResponseDTO;
-import com.project.practice.sap.dto.UserResponseDTO;
+import com.project.practice.sap.dto.UserSummaryDTO;
 import com.project.practice.sap.exception.DuplicateResourceException;
 import com.project.practice.sap.exception.InvalidFileException;
 import com.project.practice.sap.exception.ResourceNotFoundException;
@@ -107,13 +107,9 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private DocumentResponseDTO toDTO(Document document) {
-        // maybe extract these methods in a separate class with protected modifier so they can be accessed by all services
-        UserResponseDTO createdBy = new UserResponseDTO(
+        UserSummaryDTO createdBy = new UserSummaryDTO(
                 document.getCreatedBy().getId(),
-                document.getCreatedBy().getUsername(),
-                document.getCreatedBy().getEmail(),
-                document.getCreatedBy().getRoles(),
-                document.getCreatedBy().getCreatedAt()
+                document.getCreatedBy().getUsername()
         );
         return new DocumentResponseDTO(
                 document.getId(),

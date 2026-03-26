@@ -63,11 +63,16 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserResponseDTO toDTO(User user) {
+        List<RoleType> roleTypes = user.getRoles()
+                .stream()
+                .map(role -> role.getRoleType())
+                .toList();
+
         return new UserResponseDTO(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRoles(),
+                roleTypes,
                 user.getCreatedAt()
         );
     }

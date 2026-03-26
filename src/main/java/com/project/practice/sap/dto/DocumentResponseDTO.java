@@ -3,10 +3,8 @@ package com.project.practice.sap.dto;
 import java.time.LocalDateTime;
 
 public record DocumentResponseDTO(
-
-    Integer id,
-    String name,
-    LocalDateTime createdAt,
-    UserResponseDTO createdBy
-){}
-
+        Integer id,
+        String name,
+        LocalDateTime createdAt,
+        UserSummaryDTO createdBy
+) {}
