@@ -25,6 +25,20 @@ public class GlobalExceptionHandler {
                 .body(errorBody(HttpStatus.CONFLICT.value(), ex.getMessage()));
     }
 
+    @ExceptionHandler(InvalidFileException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidFile(InvalidFileException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorBody(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalStatus(IllegalStatusException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(errorBody(HttpStatus.CONFLICT.value(), ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
         return ResponseEntity
