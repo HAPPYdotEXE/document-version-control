@@ -20,11 +20,16 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DtoMapper dtoMapper;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository,
+                           RoleRepository roleRepository,
+                           PasswordEncoder passwordEncoder,
+                           DtoMapper dtoMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.dtoMapper = dtoMapper;
     }
 
     @Override
@@ -43,37 +48,21 @@ public class UserServiceImpl implements UserService {
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setRoles(roleRepository.findByRoleType(RoleType.READER).stream().toList());
 
-        User saved = userRepository.save(user);
-        return toDTO(saved);
+        return dtoMapper.toUserDTO(userRepository.save(user));
     }
 
     @Override
     public UserResponseDTO getUserById(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        return toDTO(user);
+        return dtoMapper.toUserDTO(user);
     }
 
     @Override
     public List<UserResponseDTO> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(user -> toDTO(user))
+                .map(user -> dtoMapper.toUserDTO(user))
                 .toList();
-    }
-
-    private UserResponseDTO toDTO(User user) {
-        List<RoleType> roleTypes = user.getRoles()
-                .stream()
-                .map(role -> role.getRoleType())
-                .toList();
-
-        return new UserResponseDTO(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                roleTypes,
-                user.getCreatedAt()
-        );
     }
 }
