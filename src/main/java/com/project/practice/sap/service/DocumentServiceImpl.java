@@ -54,12 +54,12 @@ public class DocumentServiceImpl implements DocumentService {
         document.setCreatedBy(user);
         Document savedDocument = documentRepository.save(document);
 
-        String filePath = fileStorageService.saveFileToDisk(file, savedDocument.getId(), "1");
+        String filePath = fileStorageService.saveFileToDisk(file, savedDocument.getId(), 1);
 
         Version version = new Version();
         version.setDocument(savedDocument);
         version.setCreatedBy(user);
-        version.setVersionNum("1");
+        version.setVersionNum(1);
         version.setStatus(DocumentStatus.UNDER_REVIEW);
         version.setActive(false);
         version.setFilePath(filePath);

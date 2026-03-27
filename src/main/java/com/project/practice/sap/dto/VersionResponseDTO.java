@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public record VersionResponseDTO(
         Integer id,
-        String versionNum,
+        Integer versionNum,
         DocumentStatus status,
         boolean isActive,
         String filePath,

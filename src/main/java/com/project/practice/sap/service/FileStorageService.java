@@ -23,7 +23,7 @@ public class FileStorageService {
 
     // saves the uploaded file to: uploads/documents/{documentId}/{versionNum}.txt
     // returns the path string that is stored in Version.filePath
-    public String saveFileToDisk(MultipartFile file, Integer documentId, String versionNum) {
+    public String saveFileToDisk(MultipartFile file, Integer documentId, Integer versionNum) {
         try {
             Path directory = Files.createDirectories(
                     Path.of("uploads", "documents", String.valueOf(documentId)));

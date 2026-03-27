@@ -11,15 +11,15 @@ public interface VersionService {
 
     VersionResponseDTO uploadNewVersion(Integer documentId, Integer userId, MultipartFile file);
 
-    VersionResponseDTO getVersion(Integer documentId, Integer versionId);
+    VersionResponseDTO getVersion(Integer documentId, Integer versionNum);
 
     List<VersionResponseDTO> getVersionHistory(Integer documentId);
 
     VersionResponseDTO getActiveVersion(Integer documentId);
 
-    Resource downloadFile(Integer documentId, Integer versionId);
+    Resource downloadFile(Integer documentId, Integer versionNum);
 
-    VersionResponseDTO approveVersion(Integer documentId, Integer versionId, ApproveVersionRequest request);
+    VersionResponseDTO approveVersion(Integer documentId, Integer versionNum, ApproveVersionRequest request);
 
-    VersionResponseDTO rejectVersion(Integer documentId, Integer versionId, ApproveVersionRequest request);
+    VersionResponseDTO rejectVersion(Integer documentId, Integer versionNum, ApproveVersionRequest request);
 }

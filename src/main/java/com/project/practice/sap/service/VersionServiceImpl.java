@@ -57,12 +57,12 @@ public class VersionServiceImpl implements VersionService {
         }
 
         int nextVersionNum = versionRepository.countByDocumentId(documentId) + 1;
-        String filePath = fileStorageService.saveFileToDisk(file, documentId, String.valueOf(nextVersionNum));
+        String filePath = fileStorageService.saveFileToDisk(file, documentId, nextVersionNum);
 
         Version version = new Version();
         version.setDocument(document);
         version.setCreatedBy(user);
-        version.setVersionNum(String.valueOf(nextVersionNum));
+        version.setVersionNum(nextVersionNum);
         version.setStatus(DocumentStatus.UNDER_REVIEW);
         version.setActive(false);
         version.setFilePath(filePath);
@@ -82,8 +82,8 @@ public class VersionServiceImpl implements VersionService {
     }
 
     @Override
-    public VersionResponseDTO getVersion(Integer documentId, Integer versionId) {
-        return dtoMapper.toVersionDTO(findVersionForDocument(documentId, versionId));
+    public VersionResponseDTO getVersion(Integer documentId, Integer versionNum) {
+        return dtoMapper.toVersionDTO(findVersionForDocument(documentId, versionNum));
     }
 
     @Override
@@ -95,15 +95,15 @@ public class VersionServiceImpl implements VersionService {
     }
 
     @Override
-    public Resource downloadFile(Integer documentId, Integer versionId) {
-        Version version = findVersionForDocument(documentId, versionId);
+    public Resource downloadFile(Integer documentId, Integer versionNum) {
+        Version version = findVersionForDocument(documentId, versionNum);
         return fileStorageService.loadFileAsResource(version.getFilePath());
     }
 
     @Override
     @Transactional
-    public VersionResponseDTO approveVersion(Integer documentId, Integer versionId, ApproveVersionRequest request) {
-        Version version = findVersionForDocument(documentId, versionId);
+    public VersionResponseDTO approveVersion(Integer documentId, Integer versionNum, ApproveVersionRequest request) {
+        Version version = findVersionForDocument(documentId, versionNum);
 
         if (version.getStatus() != DocumentStatus.UNDER_REVIEW) {
             throw new IllegalStatusException(
@@ -130,8 +130,8 @@ public class VersionServiceImpl implements VersionService {
 
     @Override
     @Transactional
-    public VersionResponseDTO rejectVersion(Integer documentId, Integer versionId, ApproveVersionRequest request) {
-        Version version = findVersionForDocument(documentId, versionId);
+    public VersionResponseDTO rejectVersion(Integer documentId, Integer versionNum, ApproveVersionRequest request) {
+        Version version = findVersionForDocument(documentId, versionNum);
 
         if (version.getStatus() != DocumentStatus.UNDER_REVIEW) {
             throw new IllegalStatusException(
@@ -149,14 +149,10 @@ public class VersionServiceImpl implements VersionService {
         return dtoMapper.toVersionDTO(versionRepository.save(version));
     }
 
-    // Finds a version and verifies it belongs to the given document
-    private Version findVersionForDocument(Integer documentId, Integer versionId) {
-        Version version = versionRepository.findById(versionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Version not found with id: " + versionId));
-        if (!version.getDocument().getId().equals(documentId)) {
-            throw new ResourceNotFoundException(
-                    "Version " + versionId + " does not belong to document " + documentId);
-        }
-        return version;
+    // Finds a version by its document-scoped number — not the global DB id
+    private Version findVersionForDocument(Integer documentId, Integer versionNum) {
+        return versionRepository.findByDocumentIdAndVersionNum(documentId, versionNum)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Version " + versionNum + " not found for document " + documentId));
     }
 }

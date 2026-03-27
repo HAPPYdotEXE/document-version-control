@@ -33,11 +33,11 @@ public class VersionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @GetMapping("/{versionId}")
+    @GetMapping("/{versionNum}")
     public ResponseEntity<VersionResponseDTO> getVersion(
             @PathVariable Integer documentId,
-            @PathVariable Integer versionId){
-        return ResponseEntity.ok(versionService.getVersion(documentId, versionId));
+            @PathVariable Integer versionNum) {
+        return ResponseEntity.ok(versionService.getVersion(documentId, versionNum));
     }
 
     @GetMapping
@@ -51,12 +51,12 @@ public class VersionController {
         return ResponseEntity.ok(versionService.getActiveVersion(documentId));
     }
 
-    @GetMapping("/{versionId}/file")
+    @GetMapping("/{versionNum}/file")
     public ResponseEntity<Resource> downloadFile(
             @PathVariable Integer documentId,
-            @PathVariable Integer versionId) {
+            @PathVariable Integer versionNum) {
 
-        Resource file = versionService.downloadFile(documentId, versionId);
+        Resource file = versionService.downloadFile(documentId, versionNum);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.TEXT_PLAIN)
@@ -65,21 +65,21 @@ public class VersionController {
                 .body(file);
     }
 
-    @PutMapping("/{versionId}/approve")
+    @PutMapping("/{versionNum}/approve")
     public ResponseEntity<VersionResponseDTO> approveVersion(
             @PathVariable Integer documentId,
-            @PathVariable Integer versionId,
+            @PathVariable Integer versionNum,
             @RequestBody ApproveVersionRequest request) {
 
-        return ResponseEntity.ok(versionService.approveVersion(documentId, versionId, request));
+        return ResponseEntity.ok(versionService.approveVersion(documentId, versionNum, request));
     }
 
-    @PutMapping("/{versionId}/reject")
+    @PutMapping("/{versionNum}/reject")
     public ResponseEntity<VersionResponseDTO> rejectVersion(
             @PathVariable Integer documentId,
-            @PathVariable Integer versionId,
+            @PathVariable Integer versionNum,
             @RequestBody ApproveVersionRequest request) {
 
-        return ResponseEntity.ok(versionService.rejectVersion(documentId, versionId, request));
+        return ResponseEntity.ok(versionService.rejectVersion(documentId, versionNum, request));
     }
 }

@@ -23,4 +23,7 @@ public interface VersionRepository extends JpaRepository<Version, Integer> {
 
     // enforces the one-pending-review rule: only one UNDER_REVIEW version allowed per document at a time
     boolean existsByDocumentIdAndStatus(Integer documentId, DocumentStatus status);
+
+    // finds a specific version by its document version number (not the global DB versionId)
+    Optional<Version> findByDocumentIdAndVersionNum(Integer documentId, Integer versionNum);
 }
