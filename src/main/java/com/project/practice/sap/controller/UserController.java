@@ -3,6 +3,7 @@ package com.project.practice.sap.controller;
 import com.project.practice.sap.dto.CreateUserRequest;
 import com.project.practice.sap.dto.UserResponseDTO;
 import com.project.practice.sap.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid CreateUserRequest request) {
         UserResponseDTO created = userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
