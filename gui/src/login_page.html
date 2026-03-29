@@ -2,36 +2,46 @@
 <html lang="bg">
 <head>
     <meta charset="UTF-8">
-    <title>Login & Signup Clean</title>
+    <title>Sync&Flow Login</title>
+
     <style>
         @import url("https://fonts.googleapis.com/css?family=Fira+Sans");
 
-        html, body {
-            position: relative;
+        body {
+            margin: 0;
             min-height: 100vh;
-            background-color: #E1E8EE;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: "Fira Sans", Helvetica, Arial, sans-serif;
-            margin: 0;
+            font-family: "Fira Sans", sans-serif;
+            background: linear-gradient(135deg, #a8edea, #fed6e3); /* мек градиент */
         }
 
         .log-check { display: none; }
 
         .form-structor {
-            background-color: #2b1eb3; /* Твоят цвят от скрийншота */
+            background-color: #ffffff; /* чисто бяло за форма */
             border-radius: 15px;
-            height: 550px;
+            height: 540px;
             width: 350px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); /* мека сянка */
+        }
+
+        /* 🔥 Лого */
+        .logo-inside {
+            text-align: center;
+            padding-top: 25px;
+        }
+
+        .logo-inside img {
+            width: 180px;
         }
 
         .form-title {
-            color: #fff;
-            font-size: 1.7em;
+            color: #333; /* по-тъмен, но мек */
+            font-size: 1.6em;
             text-align: center;
             cursor: pointer;
             margin: 10px 0;
@@ -39,123 +49,132 @@
 
         .form-title span {
             font-size: 0.6em;
-            text-transform: uppercase;
-            margin-right: 10px;
-            opacity: 0.5;
-            color: #000;
+            margin-right: 8px;
+            opacity: 0.6;
+            color: #555;
         }
 
         .form-holder {
+            background-color: #f9f9f9; /* светло сиво за полетата */
             border-radius: 10px;
-            background-color: #fff;
+            margin-top: 15px;
             overflow: hidden;
-            margin-top: 30px;
-            transition: all .3s ease;
+            transition: 0.3s;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .input {
-            border: 0; outline: none;
-            display: block;
-            height: 35px;
-            padding: 8px 15px;
-            border-bottom: 1px solid #eee;
             width: 100%;
-            box-sizing: border-box;
-            font-size: 12px;
+            border: none;
+            outline: none;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            font-size: 13px;
+            background-color: transparent;
         }
 
         .submit-btn {
-            background-color: #161058;
-            color: #fff;
-            border: 0; border-radius: 10px;
-            display: block;
-            margin: 15px auto;
-            padding: 15px 45px;
             width: 100%;
+            margin-top: 15px;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            color: white;
             font-weight: bold;
             cursor: pointer;
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            transition: 0.3s;
         }
 
-        /* SIGN UP СЕКЦИЯ */
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+
         .signup {
             position: absolute;
-            top: 50%; left: 50%;
+            top: 58%;
+            left: 50%;
             transform: translate(-50%, -50%);
             width: 75%;
             z-index: 5;
-            transition: all .3s ease;
+            transition: 0.3s;
         }
 
-        /* LOGIN СЕКЦИЯ */
+
         .login {
             position: absolute;
-            top: 20%; left: 0; right: 0; bottom: 0;
-            background-color: #fff;
+            top: 25%;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #fff;
             z-index: 10;
-            transition: all .3s ease;
+            transition: 0.3s;
         }
 
         .login::before {
             content: '';
             position: absolute;
-            left: 50%; top: -20px;
-            transform: translate(-50%, 0);
-            background-color: #fff;
-            width: 200%; height: 250px;
+            left: 50%;
+            top: -20px;
+            transform: translateX(-50%);
+            width: 200%;
+            height: 250px;
+            background: #fff;
             border-radius: 50%;
-            z-index: 4;
         }
 
         .login .center {
             position: absolute;
-            top: 40%; left: 50%;
+            top: 42%;
+            left: 50%;
             transform: translate(-50%, -50%);
             width: 75%;
-            z-index: 15;
-            transition: all .3s ease;
+            transition: 0.3s;
         }
 
-        .login .form-title { color: #000; }
+        .login .form-title {
+            color: #000;
+        }
 
-        /* --- ЛОГИКА ЗА СКРИВАНЕ НА ПОЛЕТАТА --- */
-
-        /* 1. Когато сме на SIGN UP (Log in е долу) */
+        /* SWITCH */
         #signup-trigger:checked ~ .form-structor .login {
-            top: 85%; /* Сваляме бялата част долу */
+            top: 85%;
         }
+
         #signup-trigger:checked ~ .form-structor .login .form-holder,
         #signup-trigger:checked ~ .form-structor .login .submit-btn {
             opacity: 0;
-            visibility: hidden; /* ТОВА скрива полетата, за да не "надничат" */
-            transition: all .2s ease;
+            visibility: hidden;
         }
+
         #signup-trigger:checked ~ .form-structor .login .center {
-            top: 30px; /* Позиционираме само заглавието "Log in" да се вижда */
+            top: 30px;
             transform: translate(-50%, 0);
         }
 
-        /* 2. Когато кликнем на LOG IN */
         #login-trigger:checked ~ .form-structor .login {
-            top: 20%;
+            top: 25%;
         }
+
         #login-trigger:checked ~ .form-structor .login .form-holder,
         #login-trigger:checked ~ .form-structor .login .submit-btn {
             opacity: 1;
             visibility: visible;
         }
+
         #login-trigger:checked ~ .form-structor .signup {
-            top: 10%;
-            transform: translate(-50%, 0%);
+            top: 15%;
+            transform: translate(-50%, 0);
         }
+
         #login-trigger:checked ~ .form-structor .signup .form-holder,
         #login-trigger:checked ~ .form-structor .signup .submit-btn {
             opacity: 0;
             visibility: hidden;
         }
-
-        /* Скриване на "or" текста, когато е активен съответния панел */
-        #signup-trigger:checked ~ .form-structor .signup .form-title span { display: none; }
-        #login-trigger:checked ~ .form-structor .login .form-title span { display: none; }
 
     </style>
 </head>
@@ -166,22 +185,26 @@
 
 <div class="form-structor">
 
+    <div class="logo-inside">
+        <img src="logo- final.png" alt="Sync&Flow Logo" >
+    </div>
+
     <div class="signup">
-        <label for="signup-trigger" class="form-title"><span>or</span>Sign up</label>
+        <label for="signup-trigger" class="form-title">Sign up</label>
         <div class="form-holder">
-            <input type="text" class="input" placeholder="Name" />
-            <input type="email" class="input" placeholder="Email" />
-            <input type="password" class="input" placeholder="Password" />
+            <input type="text" class="input" placeholder="Name">
+            <input type="email" class="input" placeholder="Email">
+            <input type="password" class="input" placeholder="Password">
         </div>
         <button class="submit-btn">Sign up</button>
     </div>
 
     <div class="login">
         <div class="center">
-            <label for="login-trigger" class="form-title"><span>or</span>Log in</label>
+            <label for="login-trigger" class="form-title">Log in</label>
             <div class="form-holder">
-                <input type="email" class="input" placeholder="Email" />
-                <input type="password" class="input" placeholder="Password" />
+                <input type="email" class="input" placeholder="Email">
+                <input type="password" class="input" placeholder="Password">
             </div>
             <button class="submit-btn">Log in</button>
         </div>
