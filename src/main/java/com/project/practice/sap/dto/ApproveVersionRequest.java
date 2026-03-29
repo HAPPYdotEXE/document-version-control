@@ -1,6 +1,11 @@
 package com.project.practice.sap.dto;
 
-public record ApproveVersionRequest (
-        Integer reviewerId,     // userId
-        String comment         // optional
+import jakarta.validation.constraints.NotNull;
+
+public record ApproveVersionRequest(
+
+    @NotNull(message = "Reviewer ID must be provided")
+    Integer reviewerId,
+
+    String comment    // intentionally optional — reviewers may skip the comment
 ){}
