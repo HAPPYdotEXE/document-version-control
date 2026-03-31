@@ -17,7 +17,7 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/api/documents/{documentId}/versions")
+@RequestMapping("/api/v1/documents/{documentId}/versions")
 public class VersionController {
 
     private final VersionService versionService;

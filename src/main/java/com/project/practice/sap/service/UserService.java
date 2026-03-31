@@ -12,4 +12,8 @@ public interface UserService {
     UserResponseDTO getUserById(Integer id);
 
     List<UserResponseDTO> getAllUsers();
+
+    UserResponseDTO updateUser(Integer id, String password);
+
+    void deleteUser(Integer id);
 }

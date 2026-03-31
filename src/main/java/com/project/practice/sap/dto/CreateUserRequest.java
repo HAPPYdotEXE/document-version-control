@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 
 public record CreateUserRequest(
 
+        // do add validation so no whitespaces can be saved alongside the username and email -> throw errors in case someone tries to create a user with blanks
     @NotBlank(message = "Username must not be blank")
     String username,
 
@@ -16,12 +17,4 @@ public record CreateUserRequest(
     @NotBlank(message = "Password must not be blank")
     @Size(min = 8, message = "Password must be at least 8 characters")
     String password    // plain text — the service layer will hash this before saving
-) {
-    public CreateUserRequest {
-//        username = username != null ? username.trim() : null;
-        username = username.trim();
-//        email    = email    != null ? email.trim()    : null;
-        email    = email.trim();
-
-    }
-}
+) {}

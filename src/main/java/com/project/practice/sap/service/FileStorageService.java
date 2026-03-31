@@ -35,6 +35,14 @@ public class FileStorageService {
         }
     }
 
+    public void deleteFile(String storedFilePath) {
+        try {
+            Files.deleteIfExists(Path.of(storedFilePath).toAbsolutePath());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file from disk: " + e.getMessage(), e);
+        }
+    }
+
     // loads a file from disk using the path stored in Version.filePath
     public Resource loadFileAsResource(String storedFilePath) {
         try {

@@ -12,4 +12,8 @@ public interface DocumentService {
     DocumentResponseDTO getDocumentById(Integer id);
 
     List<DocumentResponseDTO> getAllDocuments();
+
+    DocumentResponseDTO updateDocument(Integer id, String name);
+
+    void deleteDocument(Integer id);
 }

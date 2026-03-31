@@ -1,4 +1,4 @@
-package com.project.practice.sap.service;
+package com.project.practice.sap.service.util;
 
 import com.project.practice.sap.dto.DocumentResponseDTO;
 import com.project.practice.sap.dto.UserResponseDTO;

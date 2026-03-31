@@ -13,7 +13,7 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/api/v1/documents")
 public class DocumentController {
 
     private final DocumentService documentService;
@@ -41,5 +41,19 @@ public class DocumentController {
     @GetMapping("/{id}")
     public ResponseEntity<DocumentResponseDTO> getDocumentById(@PathVariable Integer id) {
         return ResponseEntity.ok(documentService.getDocumentById(id));
+    }
+
+    //updating the name of a document -> LIMITED TO AUTHOR/ADMIN
+    @PutMapping("/{id}")
+    public ResponseEntity<DocumentResponseDTO> updateDocument(
+            @PathVariable Integer id,
+            @NotBlank(message = "Document name must not be blank") @RequestParam String name) {
+        return ResponseEntity.ok(documentService.updateDocument(id, name));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDocument(@PathVariable Integer id) {
+        documentService.deleteDocument(id);
+        return ResponseEntity.noContent().build();
     }
 }

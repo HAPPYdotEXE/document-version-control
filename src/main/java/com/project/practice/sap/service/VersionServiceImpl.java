@@ -11,6 +11,8 @@ import com.project.practice.sap.model.enums.DocumentStatus;
 import com.project.practice.sap.repository.DocumentRepository;
 import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.repository.VersionRepository;
+import com.project.practice.sap.service.util.DtoMapper;
+import com.project.practice.sap.service.util.EntityLookup;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,17 +28,20 @@ public class VersionServiceImpl implements VersionService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final DtoMapper dtoMapper;
+    private final EntityLookup entityLookup;
 
     public VersionServiceImpl(VersionRepository versionRepository,
                               DocumentRepository documentRepository,
                               UserRepository userRepository,
                               FileStorageService fileStorageService,
-                              DtoMapper dtoMapper) {
+                              DtoMapper dtoMapper,
+                              EntityLookup entityLookup) {
         this.versionRepository = versionRepository;
         this.documentRepository = documentRepository;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
         this.dtoMapper = dtoMapper;
+        this.entityLookup = entityLookup;
     }
 
     @Override
@@ -44,11 +49,8 @@ public class VersionServiceImpl implements VersionService {
     public VersionResponseDTO uploadNewVersion(Integer documentId, Integer userId, MultipartFile file) {
         fileStorageService.validateTxtFile(file);
 
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Document not found with id: " + documentId));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        Document document = entityLookup.findDocumentById(documentId);
+        User user = entityLookup.findUserById(userId);
 
         if (versionRepository.existsByDocumentIdAndStatus(documentId, DocumentStatus.UNDER_REVIEW)) {
             throw new IllegalStatusException(
@@ -72,9 +74,7 @@ public class VersionServiceImpl implements VersionService {
 
     @Override
     public List<VersionResponseDTO> getVersionHistory(Integer documentId) {
-        if (!documentRepository.existsById(documentId)) {
-            throw new ResourceNotFoundException("Document not found with id: " + documentId);
-        }
+        entityLookup.findDocumentById(documentId);
         return versionRepository.findByDocumentIdOrderByCreatedAtAsc(documentId)
                 .stream()
                 .map(version -> dtoMapper.toVersionDTO(version))
@@ -83,7 +83,7 @@ public class VersionServiceImpl implements VersionService {
 
     @Override
     public VersionResponseDTO getVersion(Integer documentId, Integer versionNum) {
-        return dtoMapper.toVersionDTO(findVersionForDocument(documentId, versionNum));
+        return dtoMapper.toVersionDTO(entityLookup.findVersionByDocumentAndNum(documentId, versionNum));
     }
 
     @Override
@@ -96,14 +96,14 @@ public class VersionServiceImpl implements VersionService {
 
     @Override
     public Resource downloadFile(Integer documentId, Integer versionNum) {
-        Version version = findVersionForDocument(documentId, versionNum);
+        Version version = entityLookup.findVersionByDocumentAndNum(documentId, versionNum);
         return fileStorageService.loadFileAsResource(version.getFilePath());
     }
 
     @Override
     @Transactional
     public VersionResponseDTO approveVersion(Integer documentId, Integer versionNum, ApproveVersionRequest request) {
-        Version version = findVersionForDocument(documentId, versionNum);
+        Version version = entityLookup.findVersionByDocumentAndNum(documentId, versionNum);
 
         if (version.getStatus() != DocumentStatus.UNDER_REVIEW) {
             throw new IllegalStatusException(
@@ -111,8 +111,7 @@ public class VersionServiceImpl implements VersionService {
                     ". Only UNDER_REVIEW versions can be approved.");
         }
 
-        User reviewer = userRepository.findById(request.reviewerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Reviewer not found with id: " + request.reviewerId()));
+        User reviewer = entityLookup.findUserById(request.reviewerId());
 
         versionRepository.findByDocumentIdAndIsActiveTrue(documentId).ifPresent(activeVersion -> {
             activeVersion.setActive(false);
@@ -131,7 +130,7 @@ public class VersionServiceImpl implements VersionService {
     @Override
     @Transactional
     public VersionResponseDTO rejectVersion(Integer documentId, Integer versionNum, ApproveVersionRequest request) {
-        Version version = findVersionForDocument(documentId, versionNum);
+        Version version = entityLookup.findVersionByDocumentAndNum(documentId, versionNum);
 
         if (version.getStatus() != DocumentStatus.UNDER_REVIEW) {
             throw new IllegalStatusException(
@@ -139,8 +138,7 @@ public class VersionServiceImpl implements VersionService {
                     ". Only UNDER_REVIEW versions can be rejected.");
         }
 
-        User reviewer = userRepository.findById(request.reviewerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Reviewer not found with id: " + request.reviewerId()));
+        User reviewer = entityLookup.findUserById(request.reviewerId());
 
         version.setStatus(DocumentStatus.REJECTED);
         version.setReviewedBy(reviewer);
@@ -149,10 +147,4 @@ public class VersionServiceImpl implements VersionService {
         return dtoMapper.toVersionDTO(versionRepository.save(version));
     }
 
-    // Finds a version by its document-scoped number — not the global DB id
-    private Version findVersionForDocument(Integer documentId, Integer versionNum) {
-        return versionRepository.findByDocumentIdAndVersionNum(documentId, versionNum)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Version " + versionNum + " not found for document " + documentId));
-    }
 }
