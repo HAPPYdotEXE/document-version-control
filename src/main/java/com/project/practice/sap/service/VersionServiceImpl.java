@@ -12,6 +12,7 @@ import com.project.practice.sap.repository.DocumentRepository;
 import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.repository.VersionRepository;
 import com.project.practice.sap.service.util.DtoMapper;
+import com.project.practice.sap.service.util.EntityBuilder;
 import com.project.practice.sap.service.util.EntityLookup;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -29,19 +30,22 @@ public class VersionServiceImpl implements VersionService {
     private final FileStorageService fileStorageService;
     private final DtoMapper dtoMapper;
     private final EntityLookup entityLookup;
+    private final EntityBuilder entityBuilder;
 
     public VersionServiceImpl(VersionRepository versionRepository,
                               DocumentRepository documentRepository,
                               UserRepository userRepository,
                               FileStorageService fileStorageService,
                               DtoMapper dtoMapper,
-                              EntityLookup entityLookup) {
+                              EntityLookup entityLookup,
+                              EntityBuilder entityBuilder) {
         this.versionRepository = versionRepository;
         this.documentRepository = documentRepository;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
         this.dtoMapper = dtoMapper;
         this.entityLookup = entityLookup;
+        this.entityBuilder = entityBuilder;
     }
 
     @Override
@@ -61,15 +65,7 @@ public class VersionServiceImpl implements VersionService {
         int nextVersionNum = versionRepository.countByDocumentId(documentId) + 1;
         String filePath = fileStorageService.saveFileToDisk(file, documentId, nextVersionNum);
 
-        Version version = new Version();
-        version.setDocument(document);
-        version.setCreatedBy(user);
-        version.setVersionNum(nextVersionNum);
-        version.setStatus(DocumentStatus.UNDER_REVIEW);
-        version.setActive(false);
-        version.setFilePath(filePath);
-
-        return dtoMapper.toVersionDTO(versionRepository.save(version));
+        return dtoMapper.toVersionDTO(versionRepository.save(entityBuilder.buildVersion(document, user, nextVersionNum, filePath)));
     }
 
     @Override

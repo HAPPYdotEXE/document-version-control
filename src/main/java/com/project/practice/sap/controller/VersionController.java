@@ -32,8 +32,7 @@ public class VersionController {
             @RequestParam Integer userId,
             @RequestParam MultipartFile file) {
 
-        VersionResponseDTO created = versionService.uploadNewVersion(documentId, userId, file);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(versionService.uploadNewVersion(documentId, userId, file));
     }
 
     @GetMapping("/{versionNum}")

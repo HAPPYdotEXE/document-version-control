@@ -1,7 +1,7 @@
 package com.project.practice.sap.controller;
 
-import com.project.practice.sap.dto.CreateUserRequest;
 import com.project.practice.sap.dto.UserResponseDTO;
+import com.project.practice.sap.model.User;
 import com.project.practice.sap.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -24,15 +24,13 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid CreateUserRequest request) {
-        UserResponseDTO created = userService.createUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid User user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user));
     }
 
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
-        List<UserResponseDTO> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
 

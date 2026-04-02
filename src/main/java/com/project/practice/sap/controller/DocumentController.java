@@ -28,9 +28,7 @@ public class DocumentController {
             @RequestParam String name,
             @RequestParam Integer userId,
             @RequestParam MultipartFile file) {
-
-        DocumentResponseDTO created = documentService.createDocument(name, userId, file);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(documentService.createDocument(name, userId, file));
     }
 
     @GetMapping

@@ -5,11 +5,11 @@ import com.project.practice.sap.exception.DuplicateResourceException;
 import com.project.practice.sap.model.Document;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.Version;
-import com.project.practice.sap.model.enums.DocumentStatus;
 import com.project.practice.sap.repository.DocumentRepository;
 import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.repository.VersionRepository;
 import com.project.practice.sap.service.util.DtoMapper;
+import com.project.practice.sap.service.util.EntityBuilder;
 import com.project.practice.sap.service.util.EntityLookup;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,19 +26,22 @@ public class DocumentServiceImpl implements DocumentService {
     private final FileStorageService fileStorageService;
     private final DtoMapper dtoMapper;
     private final EntityLookup entityLookup;
+    private final EntityBuilder entityBuilder;
 
     public DocumentServiceImpl(DocumentRepository documentRepository,
                                UserRepository userRepository,
                                VersionRepository versionRepository,
                                FileStorageService fileStorageService,
                                DtoMapper dtoMapper,
-                               EntityLookup entityLookup) {
+                               EntityLookup entityLookup,
+                               EntityBuilder entityBuilder) {
         this.documentRepository = documentRepository;
         this.userRepository = userRepository;
         this.versionRepository = versionRepository;
         this.fileStorageService = fileStorageService;
         this.dtoMapper = dtoMapper;
         this.entityLookup = entityLookup;
+        this.entityBuilder = entityBuilder;
     }
 
     @Override
@@ -52,21 +55,9 @@ public class DocumentServiceImpl implements DocumentService {
 
         User user = entityLookup.findUserById(userId);
 
-        Document document = new Document();
-        document.setName(name);
-        document.setCreatedBy(user);
-        Document savedDocument = documentRepository.save(document);
-
+        Document savedDocument = documentRepository.save(entityBuilder.buildDocument(name, user));
         String filePath = fileStorageService.saveFileToDisk(file, savedDocument.getId(), 1);
-
-        Version version = new Version();
-        version.setDocument(savedDocument);
-        version.setCreatedBy(user);
-        version.setVersionNum(1);
-        version.setStatus(DocumentStatus.UNDER_REVIEW);
-        version.setActive(false);
-        version.setFilePath(filePath);
-        versionRepository.save(version);
+        versionRepository.save(entityBuilder.buildVersion(savedDocument, user, 1, filePath));
 
         return dtoMapper.toDocumentDTO(savedDocument);
     }

@@ -1,6 +1,5 @@
 package com.project.practice.sap.service;
 
-import com.project.practice.sap.dto.CreateUserRequest;
 import com.project.practice.sap.dto.UserResponseDTO;
 import com.project.practice.sap.exception.DuplicateResourceException;
 import com.project.practice.sap.model.Document;
@@ -43,18 +42,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDTO createUser(CreateUserRequest request) {
-        if (userRepository.existsByUsername(request.username())) {
-            throw new DuplicateResourceException("Username already taken: " + request.username());
+    public UserResponseDTO createUser(User user) {
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new DuplicateResourceException("Username already taken: " + user.getUsername());
         }
-        if (userRepository.existsByEmail(request.email())) {
-            throw new DuplicateResourceException("Email already registered: " + request.email());
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new DuplicateResourceException("Email already registered: " + user.getEmail());
         }
 
-        User user = new User();
-        user.setUsername(request.username());
-        user.setEmail(request.email());
-        user.setPasswordHash(passwordEncoder.encode(request.password()));
+        user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
         user.setRoles(roleRepository.findByRoleType(RoleType.READER).stream().toList());
 
         return dtoMapper.toUserDTO(userRepository.save(user));
