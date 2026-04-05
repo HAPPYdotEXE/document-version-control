@@ -20,7 +20,7 @@ public class Version {
     private Integer id;
 
     @Column(name="version_num")
-    private String versionNum;
+    private Integer versionNum;
 
     @Enumerated(EnumType.STRING)
     @Column(name="status")

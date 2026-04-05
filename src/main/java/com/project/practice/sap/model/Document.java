@@ -25,8 +25,9 @@ public class Document {
     @Column(name="created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)  // will implement DTOs
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    // done so documents are not deleted upon user deletion (simply make it false if we want to delete all documemtns linked to a user)
+    @JoinColumn(name = "user_id", nullable = true)
     @ToString.Exclude // infinite loop issue with lombok
     private User createdBy;
 }
