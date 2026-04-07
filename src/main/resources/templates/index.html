@@ -1,0 +1,683 @@
+
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sync&Flow - Home</title>
+
+    <style>
+        @import url("https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600,700");
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Fira Sans", sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e6f9ff, #b3ecff);
+            color: #1f2937;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 102, 204, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 36px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 140px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+            background: transparent;
+            flex-shrink: 0;
+        }
+
+        .logo img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: #16324f;
+            letter-spacing: 0.2px;
+        }
+
+        .nav-center {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+        }
+
+        .nav-center a {
+            text-decoration: none;
+            color: #23415f;
+            font-weight: 600;
+            font-size: 17px;
+            transition: 0.25s;
+        }
+
+        .nav-center a:hover {
+            color: #009fe3;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-box input {
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 102, 204, 0.15);
+            border-radius: 12px;
+            width: 250px;
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            border-color: #00b7ee;
+            box-shadow: 0 0 0 3px rgba(0, 183, 238, 0.15);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-btn {
+            border: none;
+            background: linear-gradient(135deg, #0066cc, #00ccff);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 8px 18px rgba(0, 102, 204, 0.18);
+            transition: 0.25s;
+        }
+
+        .dropdown-btn:hover,
+        .btn-primary:hover,
+        .view-btn:hover,
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 102, 204, 0.2);
+        }
+
+        .dropdown-content {
+            position: absolute;
+            right: 0;
+            top: 58px;
+            width: 260px;
+            background: white;
+            border: 1px solid rgba(0, 102, 204, 0.1);
+            border-radius: 14px;
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+            overflow: hidden;
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 16px;
+            background: linear-gradient(135deg, #f2fbff, #e6f9ff);
+            border-bottom: 1px solid rgba(0, 102, 204, 0.08);
+        }
+
+        .dropdown-header strong {
+            display: block;
+            font-size: 15px;
+            color: #16324f;
+        }
+
+        .dropdown-header span {
+            color: #5b7188;
+            font-size: 14px;
+            display: block;
+            margin-top: 3px;
+        }
+
+        .dropdown-content a,
+        .dropdown-content button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            border: none;
+            background: white;
+            color: #23415f;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .dropdown-content a:hover,
+        .dropdown-content button:hover {
+            background: #f2fbff;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            border: none;
+            background: white;
+            color: #23415f;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #f2fbff;
+        }
+
+        .hero {
+            padding: 56px 36px 24px;
+        }
+
+        .hero h1 {
+            font-size: 44px;
+            color: #16324f;
+            margin-bottom: 14px;
+            max-width: 780px;
+        }
+
+        .hero p {
+            color: #4d657d;
+            margin-bottom: 26px;
+            max-width: 760px;
+            font-size: 20px;
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            padding: 14px 22px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 15px;
+            transition: 0.25s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0066cc, #00ccff);
+            color: white;
+            box-shadow: 0 10px 22px rgba(0, 102, 204, 0.18);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(0, 102, 204, 0.14);
+            color: #23415f;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .page-content {
+            padding: 12px 36px 44px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 26px;
+        }
+
+        .toolbar h2 {
+            font-size: 26px;
+            color: #16324f;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 102, 204, 0.14);
+            background: rgba(255, 255, 255, 0.92);
+            color: #23415f;
+            font-size: 14px;
+        }
+
+        .filters input:focus,
+        .filters select:focus {
+            outline: none;
+            border-color: #00b7ee;
+            box-shadow: 0 0 0 3px rgba(0, 183, 238, 0.12);
+        }
+
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 22px;
+        }
+
+        .doc-card {
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 102, 204, 0.09);
+            padding: 22px;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+            transition: 0.25s;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .doc-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .doc-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #16324f;
+        }
+
+        .doc-badge {
+            background: linear-gradient(135deg, #dff7ff, #c7f1ff);
+            color: #0066cc;
+            padding: 7px 11px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .doc-desc {
+            color: #5b7188;
+            font-size: 16px;
+            line-height: 1.45;
+            margin-bottom: 18px;
+            min-height: 52px;
+        }
+
+        .doc-meta {
+            display: grid;
+            gap: 8px;
+            font-size: 15px;
+            color: #41586f;
+            margin-bottom: 18px;
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .doc-actions button {
+            flex: 1;
+            min-width: 92px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: 0.25s;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #0066cc, #00ccff);
+            color: white;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+
+        .version-btn {
+            background: #eef9ff;
+            color: #23415f;
+            border: 1px solid rgba(0, 102, 204, 0.08);
+        }
+
+        .version-btn:hover {
+            background: #e4f6ff;
+        }
+
+        @media (max-width: 900px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 14px;
+            }
+
+            .nav-center {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .nav-right {
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .logo {
+                width: 68px;
+                height: 68px;
+            }
+
+            .brand {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-left">
+        <div class="logo">
+            <img src="/images/logo-final.png" alt="Sync&Flow Logo">
+        </div>
+        <div class="brand">Sync&Flow</div>
+    </div>
+
+    <div class="nav-center">
+        <a th:href="@{/}">Home</a>
+        <a href="#documents">Documents</a>
+        <a href="#">Upload</a>
+        <a href="#">About</a>
+    </div>
+
+    <div class="nav-right">
+        <div class="search-box">
+            <input type="text" placeholder="Search documents..." disabled>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropdown-btn" id="userMenuButton"
+                    th:text="${isLoggedIn} ? ${currentUsername} : 'Login'">
+                Login
+            </button>
+
+            <div class="dropdown-content" id="userDropdown">
+                <div th:if="${isLoggedIn}">
+                    <div class="dropdown-header">
+                        <strong th:text="${currentUsername}">Username</strong>
+                        <span th:text="${currentEmail}">email@example.com</span>
+                        <span th:text="${currentRole}">User</span>
+                    </div>
+
+                    <a href="#">My Profile</a>
+                    <a href="#">My Documents</a>
+                    <a href="#">Settings</a>
+
+                    <form class="logout-form" th:action="@{/logout}" method="post">
+                        <button type="submit" class="logout-btn">Logout</button>
+                    </form>
+                </div>
+
+                <div th:unless="${isLoggedIn}">
+                    <div class="dropdown-header">
+                        <strong>Welcome</strong>
+                        <span>Please sign in to continue</span>
+                    </div>
+                    <a th:href="@{/login}">Login</a>
+                    <a th:href="@{/register}">Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<section class="hero">
+    <h1>Document Management & Version Control</h1>
+    <p>
+        View, edit, and track versions of your documents in one place.
+        Use the dashboard to find important files faster.
+    </p>
+    <div class="hero-actions">
+        <button class="btn btn-primary" type="button">+ New Document</button>
+        <button class="btn btn-secondary" type="button">View All Documents</button>
+    </div>
+</section>
+
+<section class="page-content" id="documents">
+    <div class="toolbar">
+        <h2>Documents</h2>
+        <div class="filters">
+            <input type="text" placeholder="Filter by title..." disabled>
+            <select disabled>
+                <option>Newest</option>
+            </select>
+            <select disabled>
+                <option>All Types</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="documents-grid">
+        <div class="doc-card">
+            <div class="doc-top">
+                <div class="doc-title">Project Proposal</div>
+                <div class="doc-badge">TXT</div>
+            </div>
+
+            <div class="doc-desc">
+                Initial project proposal document with requirements and scope.
+            </div>
+
+            <div class="doc-meta">
+                <div><strong>Owner:</strong> Ivan Petrov</div>
+                <div><strong>Last updated:</strong> 2026-03-29</div>
+                <div><strong>Versions:</strong> 4</div>
+            </div>
+
+            <div class="doc-actions">
+                <button class="view-btn" type="button">View</button>
+                <button class="edit-btn" type="button">Edit</button>
+                <button class="version-btn" type="button">Versions</button>
+            </div>
+        </div>
+
+        <div class="doc-card">
+            <div class="doc-top">
+                <div class="doc-title">API Documentation</div>
+                <div class="doc-badge">TXT</div>
+            </div>
+
+            <div class="doc-desc">
+                Technical documentation for backend endpoints and request examples.
+            </div>
+
+            <div class="doc-meta">
+                <div><strong>Owner:</strong> Maria Ivanova</div>
+                <div><strong>Last updated:</strong> 2026-03-28</div>
+                <div><strong>Versions:</strong> 7</div>
+            </div>
+
+            <div class="doc-actions">
+                <button class="view-btn" type="button">View</button>
+                <button class="edit-btn" type="button">Edit</button>
+                <button class="version-btn" type="button">Versions</button>
+            </div>
+        </div>
+
+        <div class="doc-card">
+            <div class="doc-top">
+                <div class="doc-title">Meeting Notes</div>
+                <div class="doc-badge">TXT</div>
+            </div>
+
+            <div class="doc-desc">
+                Sprint planning notes and action items for the team.
+            </div>
+
+            <div class="doc-meta">
+                <div><strong>Owner:</strong> Georgi Dimitrov</div>
+                <div><strong>Last updated:</strong> 2026-03-27</div>
+                <div><strong>Versions:</strong> 2</div>
+            </div>
+
+            <div class="doc-actions">
+                <button class="view-btn" type="button">View</button>
+                <button class="edit-btn" type="button">Edit</button>
+                <button class="version-btn" type="button">Versions</button>
+            </div>
+        </div>
+
+        <div class="doc-card">
+            <div class="doc-top">
+                <div class="doc-title">User Guide</div>
+                <div class="doc-badge">TXT</div>
+            </div>
+
+            <div class="doc-desc">
+                Step-by-step instructions for end users of the platform.
+            </div>
+
+            <div class="doc-meta">
+                <div><strong>Owner:</strong> Ivan Petrov</div>
+                <div><strong>Last updated:</strong> 2026-03-25</div>
+                <div><strong>Versions:</strong> 5</div>
+            </div>
+
+            <div class="doc-actions">
+                <button class="view-btn" type="button">View</button>
+                <button class="edit-btn" type="button">Edit</button>
+                <button class="version-btn" type="button">Versions</button>
+            </div>
+        </div>
+
+        <div class="doc-card">
+            <div class="doc-top">
+                <div class="doc-title">System Overview</div>
+                <div class="doc-badge">TXT</div>
+            </div>
+
+            <div class="doc-desc">
+                High-level documentation for the document version control system.
+            </div>
+
+            <div class="doc-meta">
+                <div><strong>Owner:</strong> Maria Ivanova</div>
+                <div><strong>Last updated:</strong> 2026-03-24</div>
+                <div><strong>Versions:</strong> 3</div>
+            </div>
+
+            <div class="doc-actions">
+                <button class="view-btn" type="button">View</button>
+                <button class="edit-btn" type="button">Edit</button>
+                <button class="version-btn" type="button">Versions</button>
+            </div>
+        </div>
+
+        <div class="doc-card">
+            <div class="doc-top">
+                <div class="doc-title">Release Notes</div>
+                <div class="doc-badge">TXT</div>
+            </div>
+
+            <div class="doc-desc">
+                Latest release changes, improvements, and bug fixes.
+            </div>
+
+            <div class="doc-meta">
+                <div><strong>Owner:</strong> Ivan Petrov</div>
+                <div><strong>Last updated:</strong> 2026-03-23</div>
+                <div><strong>Versions:</strong> 6</div>
+            </div>
+
+            <div class="doc-actions">
+                <button class="view-btn" type="button">View</button>
+                <button class="edit-btn" type="button">Edit</button>
+                <button class="version-btn" type="button">Versions</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const userMenuButton = document.getElementById("userMenuButton");
+    const userDropdown = document.getElementById("userDropdown");
+
+    if (userMenuButton && userDropdown) {
+        userMenuButton.addEventListener("click", () => {
+            userDropdown.classList.toggle("show");
+        });
+
+        window.addEventListener("click", (e) => {
+            if (!e.target.closest(".dropdown")) {
+                userDropdown.classList.remove("show");
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

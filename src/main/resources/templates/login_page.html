@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sync&Flow Login</title>
+
+    <style>
+        @import url("https://fonts.googleapis.com/css?family=Fira+Sans");
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Fira Sans", sans-serif;
+            background: linear-gradient(135deg, #e6f9ff, #b3ecff);
+        }
+
+        .log-check { display: none; }
+
+        .form-structor {
+            background-color: #ffffff;
+            border-radius: 15px;
+            /* Увеличена височина от 540 на 580, за да съберем новите разстояния */
+            height: 580px;
+            width: 350px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .logo-inside {
+            text-align: center;
+            padding-top: 25px;
+            position: relative;
+            z-index: 20;
+        }
+
+        .logo-inside img {
+            width: 220px;
+        }
+
+        .form-title {
+            color: #333;
+            font-size: 1.6em;
+            text-align: center;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        /* Премахваме фона от общия холдер, за да дадем разстояние на самите инпути */
+        .form-holder {
+            background-color: transparent;
+            margin-top: 10px;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 12px;
+            font-size: 13px;
+            background-color: #f0f0f0; /* Светло сиво за самите полета */
+            border-radius: 8px; /* Заоблени краища за всяко поле */
+            margin-bottom: 10px;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 5px;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            background: linear-gradient(135deg, #0066cc, #00ccff);
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .signup {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75%;
+            z-index: 5;
+            transition: 0.3s;
+        }
+
+        .login {
+            position: absolute;
+            top: 45%;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #fff;
+            z-index: 10;
+            transition: 0.3s;
+        }
+
+        /* Намалена крива, за да не "яде" от пространството на полетата */
+        .login::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: -30px;
+            transform: translateX(-50%);
+            width: 200%;
+            height: 100px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .login .center {
+            position: absolute;
+            top:20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75%;
+            transition: 0.3s;
+        }
+
+        .login .form-title { color: #000; }
+
+        /* SWITCH */
+        #signup-trigger:checked ~ .form-structor .login {
+            top: 88%;
+        }
+
+        #signup-trigger:checked ~ .form-structor .login .center {
+            top: 25px;
+            transform: translate(-50%, 0);
+        }
+
+        #login-trigger:checked ~ .form-structor .login {
+            top: 45%;
+        }
+
+        /* Когато Login е избран, заглавието на Sign up отива по-надолу */
+        #login-trigger:checked ~ .form-structor .signup {
+            top: 21%;
+            transform: translate(-50%, 0);
+        }
+
+        #login-trigger:checked ~ .form-structor .signup .form-holder,
+        #login-trigger:checked ~ .form-structor .signup .submit-btn {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .field-error {
+            color: #b00020;
+            font-size: 12px;
+            margin-top: -4px;
+            margin-bottom: 8px;
+        }
+
+    </style>
+</head>
+<body>
+
+<input type="radio" name="form-switch" id="signup-trigger" class="log-check"
+       th:checked="${mode == 'register'}">
+<input type="radio" name="form-switch" id="login-trigger" class="log-check"
+       th:checked="${mode == 'login'}">
+
+<div class="form-structor">
+
+    <div class="logo-inside">
+        <img src="/images/logo-final.png" alt="Sync&Flow Logo" >
+    </div>
+
+    <div class="signup">
+        <label for="signup-trigger" class="form-title">Sign up</label>
+
+        <div th:if="${registerError}"
+             style="color:#b00020; font-size:13px; margin-bottom:8px;"
+             th:text="${registerError}"></div>
+
+        <form th:action="@{/register}" th:object="${user}" method="post">
+            <div class="form-holder">
+                <input type="text" class="input" th:field="*{username}" placeholder="Username">
+                <div class="field-error"
+                     th:if="${#fields.hasErrors('username')}"
+                     th:errors="*{username}"></div>
+
+                <input type="email" class="input" th:field="*{email}" placeholder="Email">
+                <div class="field-error"
+                     th:if="${#fields.hasErrors('email')}"
+                     th:errors="*{email}"></div>
+
+                <input type="password" class="input" th:field="*{password}" placeholder="Password">
+                <div class="field-error"
+                     th:if="${#fields.hasErrors('password')}"
+                     th:errors="*{password}"></div>
+            </div>
+
+            <button class="submit-btn" type="submit">Sign up</button>
+        </form>
+    </div>
+
+    <div class="login">
+        <div class="center">
+            <label for="login-trigger" class="form-title">Log in</label>
+
+            <div th:if="${param.error}" style="color:#b00020; font-size:13px; margin-bottom:8px;">
+                Invalid username or password.
+            </div>
+
+            <div th:if="${successMessage}" style="color:#0f7a3c; font-size:13px; margin-bottom:8px;" th:text="${successMessage}"></div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="form-holder">
+                    <input type="text" class="input" name="username" placeholder="Username">
+                    <input type="password" class="input" name="password" placeholder="Password">
+                </div>
+                <button class="submit-btn" type="submit">Log in</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
