@@ -7,6 +7,7 @@ import com.project.practice.sap.model.Version;
 import com.project.practice.sap.repository.DocumentRepository;
 import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.repository.VersionRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,6 +23,14 @@ public class EntityLookup {
         this.userRepository = userRepository;
         this.documentRepository = documentRepository;
         this.versionRepository = versionRepository;
+    }
+
+    // Reads the authenticated user's username directly from the SecurityContext (populated by JwtAuthenticationFilter)
+    // and fetches the full User entity — no userId parameter needed or accepted from the client
+    public User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
     }
 
     public User findUserById(Integer id) {

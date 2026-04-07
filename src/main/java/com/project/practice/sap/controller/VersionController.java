@@ -1,9 +1,7 @@
 package com.project.practice.sap.controller;
 
-import com.project.practice.sap.dto.ApproveVersionRequest;
 import com.project.practice.sap.dto.VersionResponseDTO;
 import com.project.practice.sap.service.VersionService;
-import jakarta.validation.Valid;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,10 +27,9 @@ public class VersionController {
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<VersionResponseDTO> uploadNewVersion(
             @PathVariable Integer documentId,
-            @RequestParam Integer userId,
             @RequestParam MultipartFile file) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(versionService.uploadNewVersion(documentId, userId, file));
+        return ResponseEntity.status(HttpStatus.CREATED).body(versionService.uploadNewVersion(documentId, file));
     }
 
     @GetMapping("/{versionNum}")
@@ -71,17 +68,17 @@ public class VersionController {
     public ResponseEntity<VersionResponseDTO> approveVersion(
             @PathVariable Integer documentId,
             @PathVariable Integer versionNum,
-            @RequestBody @Valid ApproveVersionRequest request) {
+            @RequestParam(required = false) String comment) {
 
-        return ResponseEntity.ok(versionService.approveVersion(documentId, versionNum, request));
+        return ResponseEntity.ok(versionService.approveVersion(documentId, versionNum, comment));
     }
 
     @PutMapping("/{versionNum}/reject")
     public ResponseEntity<VersionResponseDTO> rejectVersion(
             @PathVariable Integer documentId,
             @PathVariable Integer versionNum,
-            @RequestBody @Valid ApproveVersionRequest request) {
+            @RequestParam(required = false) String comment) {
 
-        return ResponseEntity.ok(versionService.rejectVersion(documentId, versionNum, request));
+        return ResponseEntity.ok(versionService.rejectVersion(documentId, versionNum, comment));
     }
 }

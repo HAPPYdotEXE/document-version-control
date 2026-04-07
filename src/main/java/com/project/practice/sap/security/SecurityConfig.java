@@ -2,6 +2,7 @@ package com.project.practice.sap.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -36,10 +37,21 @@ public class SecurityConfig {
             // STATELESS — Spring will never create an HttpSession; every request must carry its own JWT
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public — no token required
+
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                // Everything else requires a valid JWT
+
+                .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.POST, "/api/v1/documents").hasAnyRole("AUTHOR", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/documents/**").hasAnyRole("AUTHOR", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/documents/**").hasAnyRole("AUTHOR", "ADMIN")
+
+                .requestMatchers(HttpMethod.POST, "/api/v1/documents/*/versions").hasAnyRole("AUTHOR", "ADMIN")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/documents/*/versions/*/approve").hasAnyRole("REVIEWER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/documents/*/versions/*/reject").hasAnyRole("REVIEWER", "ADMIN")
+
                 .anyRequest().authenticated()
             )
             .authenticationProvider(daoAuthenticationProvider())

@@ -20,7 +20,7 @@ public class JwtUtil {
 
     public JwtUtil(@Value("${jwt.secret}") String secret,
                    @Value("${jwt.expiration}") long expiration) {
-        // gets the secret from properties and turns it into raw bytes, after that turn these bytes into an object that can be used for cryptographic signing
+        // gets the secret from properties -> .env, and turns it into raw bytes, after that turn these bytes into an object that can be used for cryptographic signing
         this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
         this.expiration = expiration;
     }
