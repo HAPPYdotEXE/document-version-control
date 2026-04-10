@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
 
+                .requestMatchers("/api/v1/users/me").authenticated()
                 .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
 
                 .requestMatchers(HttpMethod.POST, "/api/v1/documents").hasAnyRole("AUTHOR", "ADMIN")

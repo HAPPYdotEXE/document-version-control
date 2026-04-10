@@ -23,6 +23,17 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDTO> getCurrentUser() {
+        return ResponseEntity.ok(userService.getCurrentUser());
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteCurrentUser() {
+        userService.deleteCurrentUser();
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user));

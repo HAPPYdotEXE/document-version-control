@@ -71,11 +71,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponseDTO getCurrentUser() {
+        return dtoMapper.toUserDTO(entityLookup.getCurrentUser());
+    }
+
+    @Override
     @Transactional
     public UserResponseDTO updateUser(Integer id, String password) {
         User user = entityLookup.getCurrentUser();
         user.setPasswordHash(passwordEncoder.encode(password));
         return dtoMapper.toUserDTO(userRepository.save(user));
+    }
+
+    @Override
+    @Transactional
+    public void deleteCurrentUser() {
+        User user = entityLookup.getCurrentUser();
+        deleteUser(user.getId());
     }
 
     @Override
