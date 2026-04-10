@@ -22,15 +22,12 @@ public class AuditLog {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude // infinite loop issue with lombok
-    private User createdBy;
+    private User performedBy;
 
     @Column(name="action")
     private String action;
 
-    @Column(name="details", nullable = true)
-    private String details;
-
-    @Column(name="entity_type", nullable = true)
+    @Column(name="entity_type", nullable = false)
     private String entityType;
 
     @Column(name="entity_id", nullable = true)

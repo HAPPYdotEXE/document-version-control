@@ -7,9 +7,7 @@ import java.util.List;
 
 public interface AuditLogRepository extends JpaRepository<AuditLog, Integer> {
 
-    // retrieves all audit log entries for a specific entity
-    List<AuditLog> findByEntityTypeAndEntityId(String entityType, Integer entityId);
+    List<AuditLog> findByEntityType(String entityType);
 
-    // retrieves all actions performed by a specific user
-    List<AuditLog> findByCreatedById(Integer userId);
+    List<AuditLog> findByPerformedById(Integer userId);
 }

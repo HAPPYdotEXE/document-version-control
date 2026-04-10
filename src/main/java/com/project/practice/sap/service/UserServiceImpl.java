@@ -26,19 +26,22 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final DtoMapper dtoMapper;
     private final EntityLookup entityLookup;
+    private final AuditLogService auditLogService;
 
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
                            DocumentRepository documentRepository,
                            PasswordEncoder passwordEncoder,
                            DtoMapper dtoMapper,
-                           EntityLookup entityLookup) {
+                           EntityLookup entityLookup,
+                           AuditLogService auditLogService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.documentRepository = documentRepository;
         this.passwordEncoder = passwordEncoder;
         this.dtoMapper = dtoMapper;
         this.entityLookup = entityLookup;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -54,7 +57,9 @@ public class UserServiceImpl implements UserService {
         user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
         user.setRoles(roleRepository.findByRoleType(RoleType.READER).stream().toList());
 
-        return dtoMapper.toUserDTO(userRepository.save(user));
+        User saved = userRepository.save(user);
+        auditLogService.log(saved, "USER_CREATED", "USER", saved.getId());
+        return dtoMapper.toUserDTO(saved);
     }
 
     @Override
@@ -77,9 +82,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDTO updateUser(Integer id, String password) {
+    public UserResponseDTO updateUser(String password) {
         User user = entityLookup.getCurrentUser();
         user.setPasswordHash(passwordEncoder.encode(password));
+        auditLogService.log(user, "USER_UPDATED", "USER", user.getId());
         return dtoMapper.toUserDTO(userRepository.save(user));
     }
 
@@ -99,7 +105,7 @@ public class UserServiceImpl implements UserService {
         for (Document document : user.getDocuments()) {
             document.setCreatedBy(null);
         }
-
+        auditLogService.log(entityLookup.getCurrentUser(), "USER_DELETED", "USER", id);
         userRepository.delete(user);
     }
 }

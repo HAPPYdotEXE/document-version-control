@@ -17,7 +17,7 @@ public interface UserService {
 
     void deleteCurrentUser();
 
-    UserResponseDTO updateUser(Integer id, String password);
+    UserResponseDTO updateUser(String password);
 
     void deleteUser(Integer id);
 }

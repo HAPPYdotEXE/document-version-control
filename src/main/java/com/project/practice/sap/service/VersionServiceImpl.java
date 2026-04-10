@@ -15,7 +15,6 @@ import com.project.practice.sap.service.util.EntityBuilder;
 import com.project.practice.sap.service.util.EntityLookup;
 import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +31,7 @@ public class VersionServiceImpl implements VersionService {
     private final DtoMapper dtoMapper;
     private final EntityLookup entityLookup;
     private final EntityBuilder entityBuilder;
+    private final AuditLogService auditLogService;
 
     public VersionServiceImpl(VersionRepository versionRepository,
                               DocumentRepository documentRepository,
@@ -39,7 +39,8 @@ public class VersionServiceImpl implements VersionService {
                               FileStorageService fileStorageService,
                               DtoMapper dtoMapper,
                               EntityLookup entityLookup,
-                              EntityBuilder entityBuilder) {
+                              EntityBuilder entityBuilder,
+                              AuditLogService auditLogService) {
         this.versionRepository = versionRepository;
         this.documentRepository = documentRepository;
         this.userRepository = userRepository;
@@ -47,6 +48,7 @@ public class VersionServiceImpl implements VersionService {
         this.dtoMapper = dtoMapper;
         this.entityLookup = entityLookup;
         this.entityBuilder = entityBuilder;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -67,7 +69,9 @@ public class VersionServiceImpl implements VersionService {
         int nextVersionNum = versionRepository.countByDocumentId(documentId) + 1;
         String filePath = fileStorageService.saveFileToDisk(file, documentId, nextVersionNum);
 
-        return dtoMapper.toVersionDTO(versionRepository.save(entityBuilder.buildVersion(document, user, nextVersionNum, filePath)));
+        Version version = versionRepository.save(entityBuilder.buildVersion(document, user, nextVersionNum, filePath));
+        auditLogService.log(user, "VERSION_UPLOADED", "VERSION", version.getId());
+        return dtoMapper.toVersionDTO(version);
     }
 
     @Override
@@ -123,7 +127,9 @@ public class VersionServiceImpl implements VersionService {
         version.setReviewedBy(reviewer);
         version.setReviewComment(comment);
 
-        return dtoMapper.toVersionDTO(versionRepository.save(version));
+        Version saved = versionRepository.save(version);
+        auditLogService.log(reviewer, "VERSION_APPROVED", "VERSION", saved.getId());
+        return dtoMapper.toVersionDTO(saved);
     }
 
     @Override
@@ -144,6 +150,8 @@ public class VersionServiceImpl implements VersionService {
         version.setReviewedBy(reviewer);
         version.setReviewComment(comment);
 
-        return dtoMapper.toVersionDTO(versionRepository.save(version));
+        Version saved = versionRepository.save(version);
+        auditLogService.log(reviewer, "VERSION_REJECTED", "VERSION", saved.getId());
+        return dtoMapper.toVersionDTO(saved);
     }
 }
