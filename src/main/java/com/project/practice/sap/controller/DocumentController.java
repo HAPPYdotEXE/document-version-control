@@ -24,11 +24,10 @@ public class DocumentController {
 
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<DocumentResponseDTO> createDocument(
-            @NotBlank(message = "Document name must not be blank") // applies to the request below
+            @NotBlank(message = "Document name must not be blank")
             @RequestParam String name,
-            @RequestParam Integer userId,
             @RequestParam MultipartFile file) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(documentService.createDocument(name, userId, file));
+        return ResponseEntity.status(HttpStatus.CREATED).body(documentService.createDocument(name, file));
     }
 
     @GetMapping

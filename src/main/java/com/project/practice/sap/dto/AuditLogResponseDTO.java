@@ -2,6 +2,7 @@ package com.project.practice.sap.dto;
 
 import java.time.LocalDateTime;
 
+// to be implemented
 public record AuditLogResponseDTO(
     Integer id,
     String action,

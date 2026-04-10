@@ -10,6 +10,7 @@ import com.project.practice.sap.repository.RoleRepository;
 import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.service.util.DtoMapper;
 import com.project.practice.sap.service.util.EntityLookup;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,15 +71,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponseDTO getCurrentUser() {
+        return dtoMapper.toUserDTO(entityLookup.getCurrentUser());
+    }
+
+    @Override
     @Transactional
     public UserResponseDTO updateUser(Integer id, String password) {
-        User user = entityLookup.findUserById(id);
+        User user = entityLookup.getCurrentUser();
         user.setPasswordHash(passwordEncoder.encode(password));
         return dtoMapper.toUserDTO(userRepository.save(user));
     }
 
     @Override
     @Transactional
+    public void deleteCurrentUser() {
+        User user = entityLookup.getCurrentUser();
+        deleteUser(user.getId());
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public void deleteUser(Integer id) {
         User user = entityLookup.findUserById(id);
         // documents created by a user who is deleted remain in the server/DB

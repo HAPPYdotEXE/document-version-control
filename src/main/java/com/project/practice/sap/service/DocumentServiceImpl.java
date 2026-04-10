@@ -2,6 +2,7 @@ package com.project.practice.sap.service;
 
 import com.project.practice.sap.dto.DocumentResponseDTO;
 import com.project.practice.sap.exception.DuplicateResourceException;
+import com.project.practice.sap.exception.ResourceNotFoundException;
 import com.project.practice.sap.model.Document;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.Version;
@@ -11,6 +12,8 @@ import com.project.practice.sap.repository.VersionRepository;
 import com.project.practice.sap.service.util.DtoMapper;
 import com.project.practice.sap.service.util.EntityBuilder;
 import com.project.practice.sap.service.util.EntityLookup;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,14 +49,15 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
-    public DocumentResponseDTO createDocument(String name, Integer userId, MultipartFile file) {
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    public DocumentResponseDTO createDocument(String name, MultipartFile file) {
         fileStorageService.validateTxtFile(file);
 
         if (documentRepository.existsByName(name)) {
             throw new DuplicateResourceException("A document with name '" + name + "' already exists.");
         }
 
-        User user = entityLookup.findUserById(userId);
+        User user = entityLookup.getCurrentUser();
 
         Document savedDocument = documentRepository.save(entityBuilder.buildDocument(name, user));
         String filePath = fileStorageService.saveFileToDisk(file, savedDocument.getId(), 1);
@@ -77,6 +81,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public DocumentResponseDTO updateDocument(Integer id, String name) {
         Document document = entityLookup.findDocumentById(id);
 
@@ -89,6 +94,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public void deleteDocument(Integer id) {
         Document document = entityLookup.findDocumentById(id);
 
