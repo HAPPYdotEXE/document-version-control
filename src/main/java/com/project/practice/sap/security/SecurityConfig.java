@@ -32,34 +32,36 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-            // STATELESS — Spring will never create an HttpSession; every request must carry its own JWT
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                // STATELESS — Spring will never create an HttpSession; every request must carry its own JWT
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
 
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
 
-                .requestMatchers("/api/v1/audit-logs/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/audit-logs/**").hasRole("ADMIN")
 
-                .requestMatchers("/api/v1/users/me").authenticated()
-                .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/users/me").authenticated()
+                        .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
 
-                .requestMatchers(HttpMethod.POST, "/api/v1/documents").hasAnyRole("AUTHOR", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/documents/**").hasAnyRole("AUTHOR", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/documents/**").hasAnyRole("AUTHOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/documents").hasAnyRole("AUTHOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/documents/**").hasAnyRole("AUTHOR", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/documents/**").hasAnyRole("AUTHOR", "ADMIN")
 
-                .requestMatchers(HttpMethod.POST, "/api/v1/documents/*/versions").hasAnyRole("AUTHOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/documents/*/versions").hasAnyRole("AUTHOR", "ADMIN")
 
-                .requestMatchers(HttpMethod.PUT, "/api/v1/documents/*/versions/*/approve").hasAnyRole("REVIEWER", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/documents/*/versions/*/reject").hasAnyRole("REVIEWER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/documents/*/versions/*/approve").hasAnyRole("REVIEWER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/documents/*/versions/*/reject").hasAnyRole("REVIEWER", "ADMIN")
 
-                .anyRequest().authenticated()
-            )
-            .authenticationProvider(daoAuthenticationProvider())
-            // Insert our JWT filter before Spring's default username/password filter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().authenticated()
+                )
+                .authenticationProvider(daoAuthenticationProvider())
+                // Insert our JWT filter before Spring's default username/password filter
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
