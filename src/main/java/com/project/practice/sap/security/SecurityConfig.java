@@ -44,8 +44,9 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/v1/audit-logs/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.GET,"/api/v1/users/me").authenticated()
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users").authenticated()
                         .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.POST, "/api/v1/documents").hasAnyRole("AUTHOR", "ADMIN")

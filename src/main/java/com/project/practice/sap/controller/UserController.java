@@ -51,7 +51,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     public ResponseEntity<UserResponseDTO> updateUser(
             @Size(min = 8, message = "Password must be at least 8 characters") @RequestParam String password) {
         return ResponseEntity.ok(userService.updateUser(password));
