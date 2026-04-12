@@ -3,6 +3,9 @@ package com.project.practice.sap.repository;
 import com.project.practice.sap.model.Version;
 import com.project.practice.sap.model.enums.DocumentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,4 +29,13 @@ public interface VersionRepository extends JpaRepository<Version, Integer> {
 
     // finds a specific version by its document version number (not the global DB versionId)
     Optional<Version> findByDocumentIdAndVersionNum(Integer documentId, Integer versionNum);
+
+    // set createdBy/reviewedBy to null upon ser deletion
+    @Modifying
+    @Query("UPDATE Version v SET v.createdBy = null WHERE v.createdBy.id = :userId")
+    void clearCreatedByForUser(@Param("userId") Integer userId);
+
+    @Modifying
+    @Query("UPDATE Version v SET v.reviewedBy = null WHERE v.reviewedBy.id = :userId")
+    void clearReviewedByForUser(@Param("userId") Integer userId);
 }

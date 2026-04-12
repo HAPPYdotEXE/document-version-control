@@ -2,8 +2,6 @@ package com.project.practice.sap.service;
 
 import com.project.practice.sap.dto.DocumentResponseDTO;
 import com.project.practice.sap.exception.DuplicateResourceException;
-import com.project.practice.sap.service.AuditLogService;
-import com.project.practice.sap.exception.ResourceNotFoundException;
 import com.project.practice.sap.model.Document;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.Version;
@@ -64,7 +62,8 @@ public class DocumentServiceImpl implements DocumentService {
 
         Document savedDocument = documentRepository.save(entityBuilder.buildDocument(name, user));
         String filePath = fileStorageService.saveFileToDisk(file, savedDocument.getId(), 1);
-        versionRepository.save(entityBuilder.buildVersion(savedDocument, user, 1, filePath));
+        Version v = versionRepository.save(entityBuilder.buildVersion(savedDocument, user, 1, filePath));
+        auditLogService.log(user, "INITIAL_VERSION", "VERSION", v.getId());
         auditLogService.log(user, "DOCUMENT_CREATED", "DOCUMENT", savedDocument.getId());
 
         return dtoMapper.toDocumentDTO(savedDocument);
