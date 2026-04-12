@@ -1,10 +1,7 @@
 package com.project.practice.sap.service;
 
 import com.project.practice.sap.dto.UserResponseDTO;
-import com.project.practice.sap.exception.DuplicateResourceException;
 import com.project.practice.sap.model.User;
-import com.project.practice.sap.model.enums.RoleType;
-import com.project.practice.sap.repository.RoleRepository;
 import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.service.util.DtoMapper;
 import com.project.practice.sap.service.util.EntityLookup;
@@ -20,7 +17,6 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final DtoMapper dtoMapper;
     private final EntityLookup entityLookup;
@@ -28,37 +24,17 @@ public class UserServiceImpl implements UserService {
     private final UserReferenceUtil userReferenceUtil;
 
     public UserServiceImpl(UserRepository userRepository,
-                           RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder,
                            DtoMapper dtoMapper,
                            EntityLookup entityLookup,
                            AuditLogService auditLogService,
                            UserReferenceUtil userReferenceUtil) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.dtoMapper = dtoMapper;
         this.entityLookup = entityLookup;
         this.auditLogService = auditLogService;
         this.userReferenceUtil = userReferenceUtil;
-    }
-
-    @Override
-    @Transactional
-    public UserResponseDTO createUser(User user) {
-        if (userRepository.existsByUsername(user.getUsername())) {
-            throw new DuplicateResourceException("Username already taken: " + user.getUsername());
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new DuplicateResourceException("Email already registered: " + user.getEmail());
-        }
-
-        user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(roleRepository.findByRoleType(RoleType.READER).stream().toList());
-
-        User saved = userRepository.save(user);
-        auditLogService.log(saved, "USER_CREATED", "USER", saved.getId());
-        return dtoMapper.toUserDTO(saved);
     }
 
     @Override
