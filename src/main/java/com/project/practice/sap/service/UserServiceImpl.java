@@ -1,7 +1,6 @@
 package com.project.practice.sap.service;
 
 import com.project.practice.sap.dto.UserResponseDTO;
-import com.project.practice.sap.exception.DuplicateResourceException;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.enums.AuditAction;
 import com.project.practice.sap.model.enums.AuditEntityType;
@@ -24,7 +23,6 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final DtoMapper dtoMapper;
     private final EntityLookup entityLookup;
@@ -32,14 +30,12 @@ public class UserServiceImpl implements UserService {
     private final UserReferenceUtil userReferenceUtil;
 
     public UserServiceImpl(UserRepository userRepository,
-                           RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder,
                            DtoMapper dtoMapper,
                            EntityLookup entityLookup,
                            AuditLogService auditLogService,
                            UserReferenceUtil userReferenceUtil) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.dtoMapper = dtoMapper;
         this.entityLookup = entityLookup;
