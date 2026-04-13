@@ -37,7 +37,7 @@ public class Version {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     @ToString.Exclude // infinite loop issue with lombok
     private User createdBy;
 
