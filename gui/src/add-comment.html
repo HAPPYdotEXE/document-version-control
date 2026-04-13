@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Comment Pop-up</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Modal Container */
+        .modal {
+            background-color: #ffffff;
+            width: 450px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-top: 8px solid #007bff; /* Blue accent */
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 0;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        /* Layout for IDs */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Input styling */
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: all 0.3s;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: #007bff;
+            background-color: #fcfdff;
+        }
+
+        /* Textarea specific */
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Button placement */
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        /* Submit button */
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-icon {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="modal">
+    <h2>Add Comment</h2>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="doc-id">Document ID</label>
+            <input type="text" id="doc-id" placeholder="e.g. DOC-102">
+        </div>
+
+        <div class="form-group">
+            <label for="version-id">Version ID</label>
+            <input type="text" id="version-id" placeholder="e.g. v1.2.0">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="comment">Comment</label>
+        <textarea id="comment" placeholder="Write your comment here..."></textarea>
+    </div>
+
+    <div class="actions">
+        <button class="submit-btn" onclick="submitComment()">
+            <span class="btn-icon">💬</span> SUBMIT
+        </button>
+    </div>
+</div>
+
+<script>
+    function submitComment() {
+        const docId = document.getElementById('doc-id').value;
+        const verId = document.getElementById('version-id').value;
+        const comment = document.getElementById('comment').value;
+
+        if (!docId || !verId || !comment) {
+            alert("Please fill in all fields!");
+        } else {
+            console.log("Data Submitted:", { docId, verId, comment });
+            alert("Comment for document " + docId + " submitted successfully!");
+
+            // Optional: Clear fields after success
+            document.getElementById('comment').value = "";
+        }
+    }
+</script>
+
+</body>
+</html>
