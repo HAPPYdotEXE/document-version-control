@@ -2,6 +2,7 @@ package com.project.practice.sap.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +21,7 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 public class User {
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
@@ -44,6 +46,7 @@ public class User {
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @CreatedDate
     @Column(name="created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

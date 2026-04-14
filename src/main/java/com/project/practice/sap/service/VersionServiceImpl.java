@@ -1,6 +1,5 @@
 package com.project.practice.sap.service;
 
-import com.project.practice.sap.dto.ApproveVersionRequest;
 import com.project.practice.sap.dto.VersionResponseDTO;
 import com.project.practice.sap.exception.IllegalStatusException;
 import com.project.practice.sap.exception.ResourceNotFoundException;
@@ -15,6 +14,7 @@ import com.project.practice.sap.service.util.DtoMapper;
 import com.project.practice.sap.service.util.EntityBuilder;
 import com.project.practice.sap.service.util.EntityLookup;
 import org.springframework.core.io.Resource;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +31,7 @@ public class VersionServiceImpl implements VersionService {
     private final DtoMapper dtoMapper;
     private final EntityLookup entityLookup;
     private final EntityBuilder entityBuilder;
+    private final AuditLogService auditLogService;
 
     public VersionServiceImpl(VersionRepository versionRepository,
                               DocumentRepository documentRepository,
@@ -38,7 +39,8 @@ public class VersionServiceImpl implements VersionService {
                               FileStorageService fileStorageService,
                               DtoMapper dtoMapper,
                               EntityLookup entityLookup,
-                              EntityBuilder entityBuilder) {
+                              EntityBuilder entityBuilder,
+                              AuditLogService auditLogService) {
         this.versionRepository = versionRepository;
         this.documentRepository = documentRepository;
         this.userRepository = userRepository;
@@ -46,15 +48,17 @@ public class VersionServiceImpl implements VersionService {
         this.dtoMapper = dtoMapper;
         this.entityLookup = entityLookup;
         this.entityBuilder = entityBuilder;
+        this.auditLogService = auditLogService;
     }
 
     @Override
     @Transactional
-    public VersionResponseDTO uploadNewVersion(Integer documentId, Integer userId, MultipartFile file) {
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    public VersionResponseDTO uploadNewVersion(Integer documentId, MultipartFile file) {
         fileStorageService.validateTxtFile(file);
 
         Document document = entityLookup.findDocumentById(documentId);
-        User user = entityLookup.findUserById(userId);
+        User user = entityLookup.getCurrentUser();
 
         if (versionRepository.existsByDocumentIdAndStatus(documentId, DocumentStatus.UNDER_REVIEW)) {
             throw new IllegalStatusException(
@@ -65,7 +69,9 @@ public class VersionServiceImpl implements VersionService {
         int nextVersionNum = versionRepository.countByDocumentId(documentId) + 1;
         String filePath = fileStorageService.saveFileToDisk(file, documentId, nextVersionNum);
 
-        return dtoMapper.toVersionDTO(versionRepository.save(entityBuilder.buildVersion(document, user, nextVersionNum, filePath)));
+        Version version = versionRepository.save(entityBuilder.buildVersion(document, user, nextVersionNum, filePath));
+        auditLogService.log(user, "VERSION_UPLOADED", "VERSION", version.getId());
+        return dtoMapper.toVersionDTO(version);
     }
 
     @Override
@@ -98,7 +104,8 @@ public class VersionServiceImpl implements VersionService {
 
     @Override
     @Transactional
-    public VersionResponseDTO approveVersion(Integer documentId, Integer versionNum, ApproveVersionRequest request) {
+    @PreAuthorize("hasAnyRole('REVIEWER', 'ADMIN')")
+    public VersionResponseDTO approveVersion(Integer documentId, Integer versionNum, String comment) {
         Version version = entityLookup.findVersionByDocumentAndNum(documentId, versionNum);
 
         if (version.getStatus() != DocumentStatus.UNDER_REVIEW) {
@@ -107,7 +114,7 @@ public class VersionServiceImpl implements VersionService {
                     ". Only UNDER_REVIEW versions can be approved.");
         }
 
-        User reviewer = entityLookup.findUserById(request.reviewerId());
+        User reviewer = entityLookup.getCurrentUser();
 
         versionRepository.findByDocumentIdAndIsActiveTrue(documentId).ifPresent(activeVersion -> {
             activeVersion.setActive(false);
@@ -118,14 +125,17 @@ public class VersionServiceImpl implements VersionService {
         version.setStatus(DocumentStatus.APPROVED);
         version.setActive(true);
         version.setReviewedBy(reviewer);
-        version.setReviewComment(request.comment());
+        version.setReviewComment(comment);
 
-        return dtoMapper.toVersionDTO(versionRepository.save(version));
+        Version saved = versionRepository.save(version);
+        auditLogService.log(reviewer, "VERSION_APPROVED", "VERSION", saved.getId());
+        return dtoMapper.toVersionDTO(saved);
     }
 
     @Override
     @Transactional
-    public VersionResponseDTO rejectVersion(Integer documentId, Integer versionNum, ApproveVersionRequest request) {
+    @PreAuthorize("hasAnyRole('REVIEWER', 'ADMIN')")
+    public VersionResponseDTO rejectVersion(Integer documentId, Integer versionNum, String comment) {
         Version version = entityLookup.findVersionByDocumentAndNum(documentId, versionNum);
 
         if (version.getStatus() != DocumentStatus.UNDER_REVIEW) {
@@ -134,13 +144,14 @@ public class VersionServiceImpl implements VersionService {
                     ". Only UNDER_REVIEW versions can be rejected.");
         }
 
-        User reviewer = entityLookup.findUserById(request.reviewerId());
+        User reviewer = entityLookup.getCurrentUser();
 
         version.setStatus(DocumentStatus.REJECTED);
         version.setReviewedBy(reviewer);
-        version.setReviewComment(request.comment());
+        version.setReviewComment(comment);
 
-        return dtoMapper.toVersionDTO(versionRepository.save(version));
+        Version saved = versionRepository.save(version);
+        auditLogService.log(reviewer, "VERSION_REJECTED", "VERSION", saved.getId());
+        return dtoMapper.toVersionDTO(saved);
     }
-
 }

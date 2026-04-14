@@ -11,6 +11,7 @@ import com.project.practice.sap.repository.VersionRepository;
 import com.project.practice.sap.service.util.DtoMapper;
 import com.project.practice.sap.service.util.EntityBuilder;
 import com.project.practice.sap.service.util.EntityLookup;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final DtoMapper dtoMapper;
     private final EntityLookup entityLookup;
     private final EntityBuilder entityBuilder;
+    private final AuditLogService auditLogService;
 
     public DocumentServiceImpl(DocumentRepository documentRepository,
                                UserRepository userRepository,
@@ -34,7 +36,8 @@ public class DocumentServiceImpl implements DocumentService {
                                FileStorageService fileStorageService,
                                DtoMapper dtoMapper,
                                EntityLookup entityLookup,
-                               EntityBuilder entityBuilder) {
+                               EntityBuilder entityBuilder,
+                               AuditLogService auditLogService) {
         this.documentRepository = documentRepository;
         this.userRepository = userRepository;
         this.versionRepository = versionRepository;
@@ -42,22 +45,26 @@ public class DocumentServiceImpl implements DocumentService {
         this.dtoMapper = dtoMapper;
         this.entityLookup = entityLookup;
         this.entityBuilder = entityBuilder;
+        this.auditLogService = auditLogService;
     }
 
     @Override
     @Transactional
-    public DocumentResponseDTO createDocument(String name, Integer userId, MultipartFile file) {
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    public DocumentResponseDTO createDocument(String name, MultipartFile file) {
         fileStorageService.validateTxtFile(file);
 
         if (documentRepository.existsByName(name)) {
             throw new DuplicateResourceException("A document with name '" + name + "' already exists.");
         }
 
-        User user = entityLookup.findUserById(userId);
+        User user = entityLookup.getCurrentUser();
 
         Document savedDocument = documentRepository.save(entityBuilder.buildDocument(name, user));
         String filePath = fileStorageService.saveFileToDisk(file, savedDocument.getId(), 1);
-        versionRepository.save(entityBuilder.buildVersion(savedDocument, user, 1, filePath));
+        Version v = versionRepository.save(entityBuilder.buildVersion(savedDocument, user, 1, filePath));
+        auditLogService.log(user, "INITIAL_VERSION", "VERSION", v.getId());
+        auditLogService.log(user, "DOCUMENT_CREATED", "DOCUMENT", savedDocument.getId());
 
         return dtoMapper.toDocumentDTO(savedDocument);
     }
@@ -77,6 +84,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public DocumentResponseDTO updateDocument(Integer id, String name) {
         Document document = entityLookup.findDocumentById(id);
 
@@ -84,11 +92,13 @@ public class DocumentServiceImpl implements DocumentService {
             throw new DuplicateResourceException("A document with name '" + name + "' already exists.");
         }
         document.setName(name);
+        auditLogService.log(entityLookup.getCurrentUser(), "DOCUMENT_UPDATED", "DOCUMENT", id);
         return dtoMapper.toDocumentDTO(documentRepository.save(document));
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public void deleteDocument(Integer id) {
         Document document = entityLookup.findDocumentById(id);
 
@@ -99,5 +109,6 @@ public class DocumentServiceImpl implements DocumentService {
             versionRepository.deleteById(version.getId());
         }
         documentRepository.delete(document);
+        auditLogService.log(entityLookup.getCurrentUser(), "DOCUMENT_DELETED", "DOCUMENT", id);
     }
 }

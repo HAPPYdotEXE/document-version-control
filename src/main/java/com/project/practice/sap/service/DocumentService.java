@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface DocumentService {
 
-    DocumentResponseDTO createDocument(String name, Integer userId, MultipartFile file);
+    DocumentResponseDTO createDocument(String name, MultipartFile file);
 
     DocumentResponseDTO getDocumentById(Integer id);
 

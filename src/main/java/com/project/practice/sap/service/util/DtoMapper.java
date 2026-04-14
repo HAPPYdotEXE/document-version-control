@@ -1,9 +1,11 @@
 package com.project.practice.sap.service.util;
 
+import com.project.practice.sap.dto.AuditLogResponseDTO;
 import com.project.practice.sap.dto.DocumentResponseDTO;
 import com.project.practice.sap.dto.UserResponseDTO;
 import com.project.practice.sap.dto.UserSummaryDTO;
 import com.project.practice.sap.dto.VersionResponseDTO;
+import com.project.practice.sap.model.AuditLog;
 import com.project.practice.sap.model.Document;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.Version;
@@ -41,6 +43,17 @@ public class DtoMapper {
                 document.getName(),
                 document.getCreatedAt(),
                 toUserSummary(document.getCreatedBy())
+        );
+    }
+
+    public AuditLogResponseDTO toAuditLogDTO(AuditLog log) {
+        return new AuditLogResponseDTO(
+                log.getId(),
+                toUserSummary(log.getPerformedBy()),
+                log.getAction(),
+                log.getEntityType(),
+                log.getEntityId(),
+                log.getTimeStamp()
         );
     }
 
