@@ -1,7 +1,9 @@
 package com.project.practice.sap.service;
 
 import com.project.practice.sap.dto.UserResponseDTO;
+import com.project.practice.sap.exception.DuplicateResourceException;
 import com.project.practice.sap.model.User;
+import com.project.practice.sap.model.enums.RoleType;
 import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.service.util.DtoMapper;
 import com.project.practice.sap.service.util.EntityLookup;

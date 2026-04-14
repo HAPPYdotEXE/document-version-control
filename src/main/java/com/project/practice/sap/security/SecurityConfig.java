@@ -1,8 +1,8 @@
 package com.project.practice.sap.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -40,7 +40,6 @@ public class SecurityConfig {
                                 "/",
                                 "/login",
                                 "/register",
-                                "/logout",
                                 "/images/**",
                                 "/css/**",
                                 "/js/**",
@@ -48,6 +47,20 @@ public class SecurityConfig {
                                 "/api/v1/auth/**"
                         ).permitAll()
                         .anyRequest().authenticated()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .addLogoutHandler((request, response, authentication) -> {
+                            var cookie = new jakarta.servlet.http.Cookie("jwt", "");
+                            cookie.setHttpOnly(true);
+                            cookie.setPath("/");
+                            cookie.setMaxAge(0);
+                            response.addCookie(cookie);
+                        })
+                        .clearAuthentication(true)
+                        .invalidateHttpSession(true)
+                        .permitAll()
                 )
                 .authenticationProvider(daoAuthenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

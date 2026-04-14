@@ -4,10 +4,13 @@ import com.project.practice.sap.dto.LoginRequest;
 import com.project.practice.sap.exception.DuplicateResourceException;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.service.AuthService;
-import com.project.practice.sap.service.UserService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,11 +23,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AuthPageController {
 
     private final AuthService authService;
-    private final UserService userService;
 
-    public AuthPageController(AuthService authService, UserService userService) {
+    public AuthPageController(AuthService authService) {
         this.authService = authService;
-        this.userService = userService;
     }
 
     @GetMapping("/login")
@@ -56,7 +57,7 @@ public class AuthPageController {
         }
 
         try {
-            userService.createUser(user);
+            authService.register(user);
         } catch (DuplicateResourceException ex) {
             model.addAttribute("registerError", ex.getMessage());
             model.addAttribute("mode", "register");
@@ -87,14 +88,17 @@ public class AuthPageController {
         }
     }
 
-    @PostMapping("/logout")
-    public String logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwt", "");
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-
-        return "redirect:/login";
-    }
+//    @PostMapping("/logout")
+//    public String logout(HttpServletResponse response) {
+//        ResponseCookie deleteCookie = ResponseCookie.from("jwt", "")
+//                .httpOnly(true)
+//                .path("/")
+//                .maxAge(0)
+//                .build();
+//
+//        response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+//        SecurityContextHolder.clearContext();
+//
+//        return "redirect:/login";
+//    }
 }

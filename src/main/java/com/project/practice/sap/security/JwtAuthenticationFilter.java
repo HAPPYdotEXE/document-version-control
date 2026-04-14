@@ -31,18 +31,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String token = extractToken(request);
+
         if (token != null) {
             try {
                 UsernamePasswordAuthenticationToken authToken = buildAuthToken(token, request);
                 if (authToken != null) {
-                    // Place the authenticated user into the SecurityContext for this request
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (Exception e) {
                 System.out.println("JWT filter exception: " + e.getClass().getSimpleName() + " — " + e.getMessage());
             }
         }
-        //passes the request to the next filter as authenticated if no error has been caught -> if caught it passes with no auth
+
         filterChain.doFilter(request, response);
     }
 
@@ -51,6 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
         }
+
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("jwt".equals(cookie.getName())) {
@@ -61,23 +62,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         return null;
     }
-}
 
-// Validates the token and builds the authentication object; returns null if context is already filled or token is invalid
-private UsernamePasswordAuthenticationToken buildAuthToken(String token, HttpServletRequest request) {
-    String username = jwtUtil.extractUsername(token);
-    // fills in the security auth context if its not present yet
-    if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
-        return null;
+    private UsernamePasswordAuthenticationToken buildAuthToken(String token, HttpServletRequest request) {
+        String username = jwtUtil.extractUsername(token);
+
+        if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
+            return null;
+        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        if (!jwtUtil.validateToken(token, userDetails)) {
+            return null;
+        }
+
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+
+        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        return authToken;
     }
-    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-    if (!jwtUtil.validateToken(token, userDetails)) {
-        return null;
-    }
-    // Build the authentication object
-    UsernamePasswordAuthenticationToken authToken =
-            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()); // fetch the roles
-    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-    return authToken;
-}
 }
