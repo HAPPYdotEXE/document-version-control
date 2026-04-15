@@ -22,7 +22,7 @@ public class AuditLog {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     @ToString.Exclude // infinite loop issue with lombok
     private User performedBy;
 
