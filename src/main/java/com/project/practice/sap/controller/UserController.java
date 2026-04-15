@@ -53,9 +53,8 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(
-            @PathVariable Integer id,
             @Size(min = 8, message = "Password must be at least 8 characters") @RequestParam String password) {
-        return ResponseEntity.ok(userService.updateUser(id, password));
+        return ResponseEntity.ok(userService.updateUser(password));
     }
 
     // only the users themselves and ADMINS should be able to access this endpoint

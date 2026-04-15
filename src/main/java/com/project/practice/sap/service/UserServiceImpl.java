@@ -4,6 +4,8 @@ import com.project.practice.sap.dto.UserResponseDTO;
 import com.project.practice.sap.exception.DuplicateResourceException;
 import com.project.practice.sap.model.Document;
 import com.project.practice.sap.model.User;
+import com.project.practice.sap.model.enums.AuditAction;
+import com.project.practice.sap.model.enums.AuditEntityType;
 import com.project.practice.sap.model.enums.RoleType;
 import com.project.practice.sap.repository.DocumentRepository;
 import com.project.practice.sap.repository.RoleRepository;
@@ -26,19 +28,22 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final DtoMapper dtoMapper;
     private final EntityLookup entityLookup;
+    private final AuditLogService auditLogService;
 
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
                            DocumentRepository documentRepository,
                            PasswordEncoder passwordEncoder,
                            DtoMapper dtoMapper,
-                           EntityLookup entityLookup) {
+                           EntityLookup entityLookup,
+                           AuditLogService auditLogService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.documentRepository = documentRepository;
         this.passwordEncoder = passwordEncoder;
         this.dtoMapper = dtoMapper;
         this.entityLookup = entityLookup;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -54,7 +59,9 @@ public class UserServiceImpl implements UserService {
         user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
         user.setRoles(roleRepository.findByRoleType(RoleType.READER).stream().toList());
 
-        return dtoMapper.toUserDTO(userRepository.save(user));
+        User saved = userRepository.save(user);
+        auditLogService.log(saved, AuditAction.USER_CREATED, AuditEntityType.USER, saved.getId());
+        return dtoMapper.toUserDTO(saved);
     }
 
     @Override
@@ -77,9 +84,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDTO updateUser(Integer id, String password) {
+    public UserResponseDTO updateUser(String password) {
         User user = entityLookup.getCurrentUser();
         user.setPasswordHash(passwordEncoder.encode(password));
+        auditLogService.log(user, AuditAction.USER_UPDATED, AuditEntityType.USER, user.getId());
         return dtoMapper.toUserDTO(userRepository.save(user));
     }
 
@@ -99,7 +107,7 @@ public class UserServiceImpl implements UserService {
         for (Document document : user.getDocuments()) {
             document.setCreatedBy(null);
         }
-
+        auditLogService.log(entityLookup.getCurrentUser(), AuditAction.USER_DELETED, AuditEntityType.USER, id);
         userRepository.delete(user);
     }
 }
