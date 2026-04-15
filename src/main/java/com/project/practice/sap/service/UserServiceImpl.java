@@ -4,10 +4,6 @@ import com.project.practice.sap.dto.UserResponseDTO;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.enums.AuditAction;
 import com.project.practice.sap.model.enums.AuditEntityType;
-import com.project.practice.sap.model.enums.AuditAction;
-import com.project.practice.sap.model.enums.AuditEntityType;
-import com.project.practice.sap.model.enums.RoleType;
-import com.project.practice.sap.repository.RoleRepository;
 import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.service.util.DtoMapper;
 import com.project.practice.sap.service.util.EntityLookup;
@@ -41,24 +37,6 @@ public class UserServiceImpl implements UserService {
         this.entityLookup = entityLookup;
         this.auditLogService = auditLogService;
         this.userReferenceUtil = userReferenceUtil;
-    }
-
-    @Override
-    @Transactional
-    public UserResponseDTO createUser(User user) {
-        if (userRepository.existsByUsername(user.getUsername())) {
-            throw new DuplicateResourceException("Username already taken: " + user.getUsername());
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new DuplicateResourceException("Email already registered: " + user.getEmail());
-        }
-
-        user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(roleRepository.findByRoleType(RoleType.READER).stream().toList());
-
-        User saved = userRepository.save(user);
-        auditLogService.log(saved, AuditAction.USER_CREATED, AuditEntityType.USER, saved.getId());
-        return dtoMapper.toUserDTO(saved);
     }
 
     @Override

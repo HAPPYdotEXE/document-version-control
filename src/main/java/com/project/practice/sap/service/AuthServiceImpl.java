@@ -5,6 +5,8 @@ import com.project.practice.sap.dto.LoginRequest;
 import com.project.practice.sap.dto.UserResponseDTO;
 import com.project.practice.sap.exception.DuplicateResourceException;
 import com.project.practice.sap.model.User;
+import com.project.practice.sap.model.enums.AuditAction;
+import com.project.practice.sap.model.enums.AuditEntityType;
 import com.project.practice.sap.model.enums.RoleType;
 import com.project.practice.sap.repository.RoleRepository;
 import com.project.practice.sap.repository.UserRepository;
@@ -70,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
         user.setRoles(roleRepository.findByRoleType(RoleType.READER).stream().toList());
 
         User saved = userRepository.save(user);
-        auditLogService.log(saved, "USER_CREATED", "USER", saved.getId());
+        auditLogService.log(saved, AuditAction.USER_CREATED, AuditEntityType.USER, saved.getId());
         return dtoMapper.toUserDTO(saved);
     }
 }
