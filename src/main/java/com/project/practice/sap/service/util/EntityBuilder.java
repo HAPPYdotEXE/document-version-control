@@ -1,8 +1,11 @@
 package com.project.practice.sap.service.util;
 
+import com.project.practice.sap.model.AuditLog;
 import com.project.practice.sap.model.Document;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.Version;
+import com.project.practice.sap.model.enums.AuditAction;
+import com.project.practice.sap.model.enums.AuditEntityType;
 import com.project.practice.sap.model.enums.DocumentStatus;
 import org.springframework.stereotype.Component;
 
@@ -25,5 +28,14 @@ public class EntityBuilder {
         version.setActive(false);
         version.setFilePath(filePath);
         return version;
+    }
+
+    public AuditLog buildAuditLog(User actor, AuditAction action, AuditEntityType entityType, Integer entityId) {
+        AuditLog entry = new AuditLog();
+        entry.setPerformedBy(actor);
+        entry.setAction(action);
+        entry.setEntityType(entityType);
+        entry.setEntityId(entityId);
+        return entry;
     }
 }

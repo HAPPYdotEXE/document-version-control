@@ -7,6 +7,8 @@ import com.project.practice.sap.exception.ResourceNotFoundException;
 import com.project.practice.sap.model.Document;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.Version;
+import com.project.practice.sap.model.enums.AuditAction;
+import com.project.practice.sap.model.enums.AuditEntityType;
 import com.project.practice.sap.repository.DocumentRepository;
 import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.repository.VersionRepository;
@@ -65,7 +67,7 @@ public class DocumentServiceImpl implements DocumentService {
         Document savedDocument = documentRepository.save(entityBuilder.buildDocument(name, user));
         String filePath = fileStorageService.saveFileToDisk(file, savedDocument.getId(), 1);
         versionRepository.save(entityBuilder.buildVersion(savedDocument, user, 1, filePath));
-        auditLogService.log(user, "DOCUMENT_CREATED", "DOCUMENT", savedDocument.getId());
+        auditLogService.log(user, AuditAction.DOCUMENT_CREATED, AuditEntityType.DOCUMENT, savedDocument.getId());
 
         return dtoMapper.toDocumentDTO(savedDocument);
     }
@@ -93,7 +95,7 @@ public class DocumentServiceImpl implements DocumentService {
             throw new DuplicateResourceException("A document with name '" + name + "' already exists.");
         }
         document.setName(name);
-        auditLogService.log(entityLookup.getCurrentUser(), "DOCUMENT_UPDATED", "DOCUMENT", id);
+        auditLogService.log(entityLookup.getCurrentUser(), AuditAction.DOCUMENT_UPDATED, AuditEntityType.DOCUMENT, id);
         return dtoMapper.toDocumentDTO(documentRepository.save(document));
     }
 
@@ -110,6 +112,6 @@ public class DocumentServiceImpl implements DocumentService {
             versionRepository.deleteById(version.getId());
         }
         documentRepository.delete(document);
-        auditLogService.log(entityLookup.getCurrentUser(), "DOCUMENT_DELETED", "DOCUMENT", id);
+        auditLogService.log(entityLookup.getCurrentUser(), AuditAction.DOCUMENT_DELETED, AuditEntityType.DOCUMENT, id);
     }
 }

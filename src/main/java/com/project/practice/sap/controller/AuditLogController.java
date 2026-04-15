@@ -1,6 +1,7 @@
 package com.project.practice.sap.controller;
 
 import com.project.practice.sap.dto.AuditLogResponseDTO;
+import com.project.practice.sap.model.enums.AuditEntityType;
 import com.project.practice.sap.service.AuditLogService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class AuditLogController {
     }
 
     @GetMapping("/{entityType}")
-    public ResponseEntity<List<AuditLogResponseDTO>> getLogsByEntityType(@PathVariable String entityType) {
+    public ResponseEntity<List<AuditLogResponseDTO>> getLogsByEntityType(@PathVariable AuditEntityType entityType) {
         return ResponseEntity.ok(auditLogService.getLogsByEntityType(entityType));
     }
 

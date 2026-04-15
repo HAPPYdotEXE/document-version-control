@@ -50,8 +50,8 @@ public class DtoMapper {
         return new AuditLogResponseDTO(
                 log.getId(),
                 toUserSummary(log.getPerformedBy()),
-                log.getAction(),
-                log.getEntityType(),
+                log.getAction().name(),
+                log.getEntityType().name(),
                 log.getEntityId(),
                 log.getTimeStamp()
         );

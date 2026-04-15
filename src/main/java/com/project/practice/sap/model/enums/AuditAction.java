@@ -1,0 +1,7 @@
+package com.project.practice.sap.model.enums;
+
+public enum AuditAction {
+    DOCUMENT_CREATED, DOCUMENT_UPDATED, DOCUMENT_DELETED,
+    USER_CREATED, USER_UPDATED, USER_DELETED,
+    VERSION_UPLOADED, VERSION_APPROVED, VERSION_REJECTED
+}

@@ -1,5 +1,7 @@
 package com.project.practice.sap.model;
 
+import com.project.practice.sap.model.enums.AuditAction;
+import com.project.practice.sap.model.enums.AuditEntityType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -24,11 +26,13 @@ public class AuditLog {
     @ToString.Exclude // infinite loop issue with lombok
     private User performedBy;
 
+    @Enumerated(EnumType.STRING)
     @Column(name="action")
-    private String action;
+    private AuditAction action;
 
+    @Enumerated(EnumType.STRING)
     @Column(name="entity_type", nullable = false)
-    private String entityType;
+    private AuditEntityType entityType;
 
     @Column(name="entity_id", nullable = true)
     private Integer entityId;

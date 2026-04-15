@@ -6,6 +6,8 @@ import com.project.practice.sap.exception.ResourceNotFoundException;
 import com.project.practice.sap.model.Document;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.Version;
+import com.project.practice.sap.model.enums.AuditAction;
+import com.project.practice.sap.model.enums.AuditEntityType;
 import com.project.practice.sap.model.enums.DocumentStatus;
 import com.project.practice.sap.repository.DocumentRepository;
 import com.project.practice.sap.repository.UserRepository;
@@ -70,7 +72,7 @@ public class VersionServiceImpl implements VersionService {
         String filePath = fileStorageService.saveFileToDisk(file, documentId, nextVersionNum);
 
         Version version = versionRepository.save(entityBuilder.buildVersion(document, user, nextVersionNum, filePath));
-        auditLogService.log(user, "VERSION_UPLOADED", "VERSION", version.getId());
+        auditLogService.log(user, AuditAction.VERSION_UPLOADED, AuditEntityType.VERSION, version.getId());
         return dtoMapper.toVersionDTO(version);
     }
 
@@ -128,7 +130,7 @@ public class VersionServiceImpl implements VersionService {
         version.setReviewComment(comment);
 
         Version saved = versionRepository.save(version);
-        auditLogService.log(reviewer, "VERSION_APPROVED", "VERSION", saved.getId());
+        auditLogService.log(reviewer, AuditAction.VERSION_APPROVED, AuditEntityType.VERSION, saved.getId());
         return dtoMapper.toVersionDTO(saved);
     }
 
@@ -151,7 +153,7 @@ public class VersionServiceImpl implements VersionService {
         version.setReviewComment(comment);
 
         Version saved = versionRepository.save(version);
-        auditLogService.log(reviewer, "VERSION_REJECTED", "VERSION", saved.getId());
+        auditLogService.log(reviewer, AuditAction.VERSION_REJECTED, AuditEntityType.VERSION, saved.getId());
         return dtoMapper.toVersionDTO(saved);
     }
 }
