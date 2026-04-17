@@ -17,15 +17,13 @@
             background: linear-gradient(135deg, #e6f9ff, #b3ecff);
         }
 
-        .log-check {
-            display: none;
-        }
+        .log-check { display: none; }
 
         .form-structor {
             background-color: #ffffff;
             border-radius: 15px;
-            height: 640px;
-            width: 370px;
+            height: 620px;
+            width: 350px;
             position: relative;
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0,0,0,0.15);
@@ -90,7 +88,7 @@
 
         .signup {
             position: absolute;
-            top: 60%;
+            top: 58%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 75%;
@@ -123,40 +121,14 @@
 
         .login .center {
             position: absolute;
-            top: 20%;
+            top:20%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 75%;
             transition: 0.3s;
         }
 
-        .login .form-title {
-            color: #000;
-        }
-
-        .message {
-            font-size: 13px;
-            margin-bottom: 10px;
-            padding: 10px 12px;
-            border-radius: 8px;
-        }
-
-        .message.error {
-            background: #ffe3e3;
-            color: #a40000;
-        }
-
-        .message.success {
-            background: #e6f8eb;
-            color: #0b7a3b;
-        }
-
-        .field-error {
-            color: #a40000;
-            font-size: 12px;
-            margin-top: -4px;
-            margin-bottom: 8px;
-        }
+        .login .form-title { color: #000; }
 
         #signup-trigger:checked ~ .form-structor .login {
             top: 88%;
@@ -177,9 +149,7 @@
         }
 
         #login-trigger:checked ~ .form-structor .signup .form-holder,
-        #login-trigger:checked ~ .form-structor .signup .submit-btn,
-        #login-trigger:checked ~ .form-structor .signup .message,
-        #login-trigger:checked ~ .form-structor .signup .field-error {
+        #login-trigger:checked ~ .form-structor .signup .submit-btn {
             opacity: 0;
             visibility: hidden;
         }
@@ -201,20 +171,21 @@
     <div class="signup">
         <label for="signup-trigger" class="form-title">Sign up</label>
 
-        <div th:if="${registerError}" class="message error" th:text="${registerError}"></div>
+        <div th:if="${registerError}" style="color:#b00020; font-size:13px; margin-bottom:8px;" th:text="${registerError}"></div>
 
         <form th:action="@{/register}" th:object="${user}" method="post">
             <div class="form-holder">
                 <input type="text" class="input" th:field="*{username}" placeholder="Username">
-                <div class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
-
                 <input type="email" class="input" th:field="*{email}" placeholder="Email">
-                <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-
                 <input type="password" class="input" th:field="*{password}" placeholder="Password">
-                <div class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-            </div>
 
+                <select class="input" name="role">
+                    <option value="">Select role</option>
+                    <option value="READER">Reader</option>
+                    <option value="AUTHOR">Author</option>
+                    <option value="ADMIN">Admin</option>
+                </select>
+            </div>
             <button class="submit-btn" type="submit">Sign up</button>
         </form>
     </div>
@@ -223,16 +194,15 @@
         <div class="center">
             <label for="login-trigger" class="form-title">Log in</label>
 
-            <div th:if="${loginError}" class="message error" th:text="${loginError}"></div>
+            <div th:if="${loginError}" style="color:#b00020; font-size:13px; margin-bottom:8px;" th:text="${loginError}"></div>
 
-            <div th:if="${successMessage}" class="message success" th:text="${successMessage}"></div>
+            <div th:if="${successMessage}" style="color:#0f7a3c; font-size:13px; margin-bottom:8px;" th:text="${successMessage}"></div>
 
             <form th:action="@{/login}" method="post">
                 <div class="form-holder">
                     <input type="text" class="input" name="username" placeholder="Username">
                     <input type="password" class="input" name="password" placeholder="Password">
                 </div>
-
                 <button class="submit-btn" type="submit">Log in</button>
             </form>
         </div>

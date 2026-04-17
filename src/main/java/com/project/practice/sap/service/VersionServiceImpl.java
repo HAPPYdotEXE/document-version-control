@@ -1,5 +1,6 @@
 package com.project.practice.sap.service;
 
+import com.project.practice.sap.dto.DocumentViewDTO;
 import com.project.practice.sap.dto.VersionResponseDTO;
 import com.project.practice.sap.exception.IllegalStatusException;
 import com.project.practice.sap.exception.ResourceNotFoundException;
@@ -18,6 +19,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import java.util.List;
 
@@ -63,13 +66,17 @@ public class VersionServiceImpl implements VersionService {
         if (versionRepository.existsByDocumentIdAndStatus(documentId, DocumentStatus.UNDER_REVIEW)) {
             throw new IllegalStatusException(
                     "A version is already pending review for this document. " +
-                    "It must be approved or rejected before a new version can be uploaded.");
+                            "It must be approved or rejected before a new version can be uploaded."
+            );
         }
 
         int nextVersionNum = versionRepository.countByDocumentId(documentId) + 1;
         String filePath = fileStorageService.saveFileToDisk(file, documentId, nextVersionNum);
 
-        Version version = versionRepository.save(entityBuilder.buildVersion(document, user, nextVersionNum, filePath));
+        Version version = versionRepository.save(
+                entityBuilder.buildPendingVersion(document, user, nextVersionNum, filePath)
+        );
+
         auditLogService.log(user, "VERSION_UPLOADED", "VERSION", version.getId());
         return dtoMapper.toVersionDTO(version);
     }
@@ -154,4 +161,27 @@ public class VersionServiceImpl implements VersionService {
         auditLogService.log(reviewer, "VERSION_REJECTED", "VERSION", saved.getId());
         return dtoMapper.toVersionDTO(saved);
     }
+
+    @Override
+    public DocumentViewDTO getActiveDocumentView(Integer documentId) {
+        Version version = versionRepository.findByDocumentIdAndIsActiveTrue(documentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No active (approved) version found for document id: " + documentId));
+
+        try {
+            Resource resource = fileStorageService.loadFileAsResource(version.getFilePath());
+            String content = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+            return new DocumentViewDTO(
+                    version.getDocument().getId(),
+                    version.getDocument().getName(),
+                    version.getVersionNum(),
+                    content,
+                    version.getCreatedAt()
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read document content.", e);
+        }
+    }
+
 }

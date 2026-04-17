@@ -8,8 +8,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -49,6 +48,7 @@ public class AuthPageController {
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") User user,
                                BindingResult bindingResult,
+                               @RequestParam("role") String role,
                                Model model,
                                RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
@@ -57,8 +57,8 @@ public class AuthPageController {
         }
 
         try {
-            authService.register(user);
-        } catch (DuplicateResourceException ex) {
+            authService.register(user, role);
+        } catch (DuplicateResourceException | IllegalArgumentException ex) {
             model.addAttribute("registerError", ex.getMessage());
             model.addAttribute("mode", "register");
             return "login_page";
@@ -88,17 +88,21 @@ public class AuthPageController {
         }
     }
 
-//    @PostMapping("/logout")
-//    public String logout(HttpServletResponse response) {
-//        ResponseCookie deleteCookie = ResponseCookie.from("jwt", "")
-//                .httpOnly(true)
-//                .path("/")
-//                .maxAge(0)
-//                .build();
-//
-//        response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
-//        SecurityContextHolder.clearContext();
-//
-//        return "redirect:/login";
-//    }
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt", "");
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        SecurityContextHolder.clearContext();
+
+        var session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        return "redirect:/login";
+    }
 }

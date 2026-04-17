@@ -5,6 +5,7 @@ import com.project.practice.sap.exception.DuplicateResourceException;
 import com.project.practice.sap.model.Document;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.Version;
+import com.project.practice.sap.model.enums.DocumentStatus;
 import com.project.practice.sap.repository.DocumentRepository;
 import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.repository.VersionRepository;
@@ -62,8 +63,20 @@ public class DocumentServiceImpl implements DocumentService {
 
         Document savedDocument = documentRepository.save(entityBuilder.buildDocument(name, user));
         String filePath = fileStorageService.saveFileToDisk(file, savedDocument.getId(), 1);
-        Version v = versionRepository.save(entityBuilder.buildVersion(savedDocument, user, 1, filePath));
-        auditLogService.log(user, "INITIAL_VERSION", "VERSION", v.getId());
+
+        Version initialVersion = new Version();
+        initialVersion.setDocument(savedDocument);
+        initialVersion.setCreatedBy(user);
+        initialVersion.setVersionNum(1);
+        initialVersion.setFilePath(filePath);
+        initialVersion.setStatus(DocumentStatus.APPROVED);
+        initialVersion.setActive(true);
+        initialVersion.setReviewedBy(user);
+        initialVersion.setReviewComment("Initial version auto-approved on document creation.");
+
+        Version savedVersion = versionRepository.save(initialVersion);
+
+        auditLogService.log(user, "INITIAL_VERSION", "VERSION", savedVersion.getId());
         auditLogService.log(user, "DOCUMENT_CREATED", "DOCUMENT", savedDocument.getId());
 
         return dtoMapper.toDocumentDTO(savedDocument);

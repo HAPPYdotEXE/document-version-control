@@ -1,5 +1,6 @@
 package com.project.practice.sap.service;
 
+import com.project.practice.sap.dto.DocumentViewDTO;
 import com.project.practice.sap.dto.VersionResponseDTO;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,4 +22,6 @@ public interface VersionService {
     VersionResponseDTO approveVersion(Integer documentId, Integer versionNum, String comment);
 
     VersionResponseDTO rejectVersion(Integer documentId, Integer versionNum, String comment);
+
+    DocumentViewDTO getActiveDocumentView(Integer documentId);
 }

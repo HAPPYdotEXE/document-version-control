@@ -40,13 +40,21 @@ public class SecurityConfig {
                                 "/",
                                 "/login",
                                 "/register",
+                                "/logout",
+                                "/error",
                                 "/images/**",
                                 "/css/**",
                                 "/js/**",
                                 "/h2-console/**",
-                                "/api/v1/auth/**"
+                                "/api/v1/auth/**",
+                                "/documents/create"
                         ).permitAll()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendRedirect("/login");
+                        })
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -293,13 +292,6 @@
             font-size: 14px;
         }
 
-        .filters input:focus,
-        .filters select:focus {
-            outline: none;
-            border-color: #00b7ee;
-            box-shadow: 0 0 0 3px rgba(0, 183, 238, 0.12);
-        }
-
         .documents-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -397,6 +389,131 @@
             background: #e4f6ff;
         }
 
+        .empty-documents {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px dashed rgba(0, 102, 204, 0.2);
+            border-radius: 18px;
+            padding: 30px;
+            text-align: center;
+            color: #4d657d;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-documents h3 {
+            color: #16324f;
+            margin-bottom: 10px;
+        }
+
+        .custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .custom-modal.show {
+            display: flex;
+        }
+
+        .custom-modal-content {
+            background: white;
+            width: 100%;
+            max-width: 380px;
+            border-radius: 18px;
+            padding: 26px 22px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+            text-align: center;
+        }
+
+        .custom-modal-content h3 {
+            margin-bottom: 12px;
+            color: #16324f;
+            font-size: 24px;
+        }
+
+        .custom-modal-content p {
+            color: #5b7188;
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-close-btn {
+            border: none;
+            background: linear-gradient(135deg, #0066cc, #00ccff);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .doc-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .doc-actions-top {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .doc-actions a,
+    .doc-actions button {
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 14px;
+        transition: 0.25s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        padding: 12px 14px;
+    }
+
+    .view-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #0066cc, #00ccff);
+        color: white;
+        min-height: 52px;
+        font-size: 18px;
+    }
+
+    .edit-btn {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+    }
+
+    .version-btn {
+        background: #eef2f7;
+        color: #23415f;
+        border: 1px solid rgba(0, 102, 204, 0.08);
+    }
+
+    .version-btn:hover {
+        background: #e4edf7;
+    }
+
+    .delete-btn {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: white;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(0, 102, 204, 0.15);
+    }
+
         @media (max-width: 900px) {
             .navbar {
                 flex-direction: column;
@@ -461,7 +578,7 @@
 
         <div class="dropdown">
             <button class="dropdown-btn" id="userMenuButton"
-                    th:text="${isLoggedIn} ? ${currentUsername} : 'Login'">
+                    th:text="${isLoggedIn ? currentUsername : 'Login'}">
                 Login
             </button>
 
@@ -502,7 +619,20 @@
         Use the dashboard to find important files faster.
     </p>
     <div class="hero-actions">
-        <button class="btn btn-primary" type="button">+ New Document</button>
+        <a th:if="${canCreateDocuments}"
+           th:href="@{/documents/create}"
+           class="btn btn-primary"
+           style="text-decoration:none; display:inline-block;">
+            + New Document
+        </a>
+
+        <button th:unless="${canCreateDocuments}"
+                class="btn btn-primary"
+                type="button"
+                onclick="showNoPermissionPopup()">
+            + New Document
+        </button>
+
         <button class="btn btn-secondary" type="button">View All Documents</button>
     </div>
 </section>
@@ -521,150 +651,92 @@
         </div>
     </div>
 
-    <div class="documents-grid">
-        <div class="doc-card">
+    <div th:if="${documents != null and !documents.isEmpty()}" class="documents-grid">
+        <div class="doc-card" th:each="doc : ${documents}">
             <div class="doc-top">
-                <div class="doc-title">Project Proposal</div>
+                <div class="doc-title" th:text="${doc.name}">Document Title</div>
                 <div class="doc-badge">TXT</div>
             </div>
 
             <div class="doc-desc">
-                Initial project proposal document with requirements and scope.
+                No description available.
             </div>
 
             <div class="doc-meta">
-                <div><strong>Owner:</strong> Ivan Petrov</div>
-                <div><strong>Last updated:</strong> 2026-03-29</div>
-                <div><strong>Versions:</strong> 4</div>
+                <div>
+                    <strong>Owner:</strong>
+                    <span th:text="${doc.createdBy != null ? doc.createdBy.username : 'Unknown'}">Owner</span>
+                </div>
+                <div>
+                    <strong>Created at:</strong>
+                    <span th:text="${doc.createdAt != null ? #temporals.format(doc.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">Date</span>
+                </div>
+                <div>
+                    <strong>Versions:</strong>
+                    <span>0</span>
+                </div>
             </div>
 
             <div class="doc-actions">
-                <button class="view-btn" type="button">View</button>
-                <button class="edit-btn" type="button">Edit</button>
-                <button class="version-btn" type="button">Versions</button>
-            </div>
-        </div>
+                <div class="doc-actions-top">
+                    <a class="edit-btn action-btn"
+                       th:href="@{/documents/{id}/edit(id=${doc.id})}">
+                        Edit
+                    </a>
 
-        <div class="doc-card">
-            <div class="doc-top">
-                <div class="doc-title">API Documentation</div>
-                <div class="doc-badge">TXT</div>
-            </div>
+                    <a class="version-btn action-btn"
+                       th:href="@{/documents/{id}/versions(id=${doc.id})}">
+                        Versions
+                    </a>
 
-            <div class="doc-desc">
-                Technical documentation for backend endpoints and request examples.
-            </div>
+                    <a class="delete-btn action-btn"
+                       th:href="@{/documents/{id}/delete(id=${doc.id})}">
+                        Delete
+                    </a>
+                </div>
 
-            <div class="doc-meta">
-                <div><strong>Owner:</strong> Maria Ivanova</div>
-                <div><strong>Last updated:</strong> 2026-03-28</div>
-                <div><strong>Versions:</strong> 7</div>
-            </div>
+                <a th:if="${isLoggedIn}"
+                   class="view-btn action-btn"
+                   th:href="@{/documents/{id}/view(id=${doc.id})}">
+                    View
+                </a>
 
-            <div class="doc-actions">
-                <button class="view-btn" type="button">View</button>
-                <button class="edit-btn" type="button">Edit</button>
-                <button class="version-btn" type="button">Versions</button>
-            </div>
-        </div>
-
-        <div class="doc-card">
-            <div class="doc-top">
-                <div class="doc-title">Meeting Notes</div>
-                <div class="doc-badge">TXT</div>
-            </div>
-
-            <div class="doc-desc">
-                Sprint planning notes and action items for the team.
-            </div>
-
-            <div class="doc-meta">
-                <div><strong>Owner:</strong> Georgi Dimitrov</div>
-                <div><strong>Last updated:</strong> 2026-03-27</div>
-                <div><strong>Versions:</strong> 2</div>
-            </div>
-
-            <div class="doc-actions">
-                <button class="view-btn" type="button">View</button>
-                <button class="edit-btn" type="button">Edit</button>
-                <button class="version-btn" type="button">Versions</button>
-            </div>
-        </div>
-
-        <div class="doc-card">
-            <div class="doc-top">
-                <div class="doc-title">User Guide</div>
-                <div class="doc-badge">TXT</div>
-            </div>
-
-            <div class="doc-desc">
-                Step-by-step instructions for end users of the platform.
-            </div>
-
-            <div class="doc-meta">
-                <div><strong>Owner:</strong> Ivan Petrov</div>
-                <div><strong>Last updated:</strong> 2026-03-25</div>
-                <div><strong>Versions:</strong> 5</div>
-            </div>
-
-            <div class="doc-actions">
-                <button class="view-btn" type="button">View</button>
-                <button class="edit-btn" type="button">Edit</button>
-                <button class="version-btn" type="button">Versions</button>
-            </div>
-        </div>
-
-        <div class="doc-card">
-            <div class="doc-top">
-                <div class="doc-title">System Overview</div>
-                <div class="doc-badge">TXT</div>
-            </div>
-
-            <div class="doc-desc">
-                High-level documentation for the document version control system.
-            </div>
-
-            <div class="doc-meta">
-                <div><strong>Owner:</strong> Maria Ivanova</div>
-                <div><strong>Last updated:</strong> 2026-03-24</div>
-                <div><strong>Versions:</strong> 3</div>
-            </div>
-
-            <div class="doc-actions">
-                <button class="view-btn" type="button">View</button>
-                <button class="edit-btn" type="button">Edit</button>
-                <button class="version-btn" type="button">Versions</button>
-            </div>
-        </div>
-
-        <div class="doc-card">
-            <div class="doc-top">
-                <div class="doc-title">Release Notes</div>
-                <div class="doc-badge">TXT</div>
-            </div>
-
-            <div class="doc-desc">
-                Latest release changes, improvements, and bug fixes.
-            </div>
-
-            <div class="doc-meta">
-                <div><strong>Owner:</strong> Ivan Petrov</div>
-                <div><strong>Last updated:</strong> 2026-03-23</div>
-                <div><strong>Versions:</strong> 6</div>
-            </div>
-
-            <div class="doc-actions">
-                <button class="view-btn" type="button">View</button>
-                <button class="edit-btn" type="button">Edit</button>
-                <button class="version-btn" type="button">Versions</button>
+                <button th:unless="${isLoggedIn}"
+                        class="view-btn action-btn"
+                        type="button"
+                        onclick="showLoginRequiredPopup()">
+                    View
+                </button>
             </div>
         </div>
     </div>
+
+    <div th:if="${documents == null or documents.isEmpty()}" class="empty-documents">
+        <h3>No documents yet</h3>
+        <p>There are currently no uploaded documents to display.</p>
+    </div>
 </section>
+
+<div id="noPermissionModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <h3>Access denied</h3>
+        <p>You do not have permission to create documents.</p>
+        <button type="button" class="modal-close-btn" onclick="closeNoPermissionPopup()">OK</button>
+    </div>
+</div>
+<div id="loginRequiredModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <h3>Login required</h3>
+        <p>You need to be logged in to view documents.</p>
+        <button type="button" class="modal-close-btn" onclick="closeLoginRequiredPopup()">OK</button>
+    </div>
+</div>
 
 <script>
     const userMenuButton = document.getElementById("userMenuButton");
     const userDropdown = document.getElementById("userDropdown");
+    const noPermissionModal = document.getElementById("noPermissionModal");
+    const loginRequiredModal = document.getElementById("loginRequiredModal");
 
     if (userMenuButton && userDropdown) {
         userMenuButton.addEventListener("click", () => {
@@ -677,6 +749,39 @@
             }
         });
     }
+
+    function showNoPermissionPopup() {
+        if (noPermissionModal) {
+            noPermissionModal.classList.add("show");
+        }
+    }
+
+    function closeNoPermissionPopup() {
+        if (noPermissionModal) {
+            noPermissionModal.classList.remove("show");
+        }
+    }
+
+    function showLoginRequiredPopup() {
+        if (loginRequiredModal) {
+            loginRequiredModal.classList.add("show");
+        }
+    }
+
+    function closeLoginRequiredPopup() {
+        if (loginRequiredModal) {
+            loginRequiredModal.classList.remove("show");
+        }
+    }
+
+    window.addEventListener("click", (e) => {
+        if (e.target === noPermissionModal) {
+            closeNoPermissionPopup();
+        }
+        if (e.target === loginRequiredModal) {
+            closeLoginRequiredPopup();
+        }
+    });
 </script>
 
 </body>
