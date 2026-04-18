@@ -1,5 +1,6 @@
 package com.project.practice.sap.service;
 
+import com.project.practice.sap.dto.DocumentViewDTO;
 import com.project.practice.sap.dto.VersionResponseDTO;
 import com.project.practice.sap.exception.IllegalStatusException;
 import com.project.practice.sap.exception.ResourceNotFoundException;
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -155,5 +158,27 @@ public class VersionServiceImpl implements VersionService {
         Version saved = versionRepository.save(version);
         auditLogService.log(reviewer, AuditAction.VERSION_REJECTED, AuditEntityType.VERSION, saved.getId());
         return dtoMapper.toVersionDTO(saved);
+    }
+
+    @Override
+    public DocumentViewDTO getActiveDocumentView(Integer documentId) {
+        Version version = versionRepository.findByDocumentIdAndIsActiveTrue(documentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No active (approved) version found for document id: " + documentId));
+
+        try {
+            Resource resource = fileStorageService.loadFileAsResource(version.getFilePath());
+            String content = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+            return new DocumentViewDTO(
+                    version.getDocument().getId(),
+                    version.getDocument().getName(),
+                    version.getVersionNum(),
+                    content,
+                    version.getCreatedAt()
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read document content.", e);
+        }
     }
 }
