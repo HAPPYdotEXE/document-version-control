@@ -34,7 +34,7 @@ public class AuthController {
 
     @Operation(summary = "Register a new account — assigned READER role by default")
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@RequestBody @Valid User user) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(user));
+    public ResponseEntity<UserResponseDTO> register(@RequestBody @Valid User user, String role) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(user, role));
     }
 }

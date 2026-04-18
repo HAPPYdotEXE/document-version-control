@@ -1,8 +1,8 @@
 package com.project.practice.sap.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -34,40 +34,48 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-                // STATELESS — Spring will never create an HttpSession; every request must carry its own JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-
-                        .requestMatchers("/api/v1/audit-logs/**").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/users").authenticated()
-                        .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.POST, "/api/v1/documents").hasAnyRole("AUTHOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/documents/**").hasAnyRole("AUTHOR", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/documents/**").hasAnyRole("AUTHOR", "ADMIN")
-
-                        .requestMatchers(HttpMethod.POST, "/api/v1/documents/*/versions").hasAnyRole("AUTHOR", "ADMIN")
-
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/documents/*/versions/*/approve").hasAnyRole("REVIEWER", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/documents/*/versions/*/reject").hasAnyRole("REVIEWER", "ADMIN")
-
+                        .requestMatchers(
+                                "/",
+                                "/login",
+                                "/register",
+                                "/logout",
+                                "/error",
+                                "/images/**",
+                                "/css/**",
+                                "/js/**",
+                                "/h2-console/**",
+                                "/api/v1/auth/**",
+                                "/documents/create"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendRedirect("/login");
+                        })
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .addLogoutHandler((request, response, authentication) -> {
+                            var cookie = new jakarta.servlet.http.Cookie("jwt", "");
+                            cookie.setHttpOnly(true);
+                            cookie.setPath("/");
+                            cookie.setMaxAge(0);
+                            response.addCookie(cookie);
+                        })
+                        .clearAuthentication(true)
+                        .invalidateHttpSession(true)
+                        .permitAll()
+                )
                 .authenticationProvider(daoAuthenticationProvider())
-                // Insert our JWT filter before Spring's default username/password filter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // Wires together our UserDetailsService and BCrypt encoder — this is what authenticate() calls internally
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
@@ -75,7 +83,6 @@ public class SecurityConfig {
         return provider;
     }
 
-    // Exposed as a bean so AuthServiceImpl can call authenticate() directly
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
