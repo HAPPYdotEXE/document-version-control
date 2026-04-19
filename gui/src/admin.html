@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - User Management</title>
+    <style>
+        :root {
+            --primary-blue: #007bff;
+            --dark-blue: #0056b3;
+            --bg-color: #f4f7f9;
+            --text-gray: #666;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 { margin: 0; font-size: 24px; color: var(--primary-blue); }
+
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; background: #f8f9fa; color: var(--text-gray); padding: 15px; font-size: 13px; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #f0f0f0; font-size: 15px; }
+
+        .role-select { padding: 6px; border-radius: 6px; border: 1px solid #d1d1d1; }
+        .btn { padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .btn-view { background: #e7f3ff; color: var(--primary-blue); margin-right: 5px; }
+        .btn-delete { background: #fff; color: #dc3545; border: 1px solid #dc3545; }
+        .btn-delete:hover { background: #dc3545; color: #fff; }
+
+        /* Modal Background Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* Profile Modal Style */
+        .profile-modal {
+            background: #fff;
+            width: 400px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .avatar { width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; margin: 0 auto 10px; border: 2px solid white; }
+
+        .modal-body { padding: 20px; }
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .label { color: #888; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .value { color: #333; font-size: 14px; }
+
+        .modal-footer { padding: 15px; text-align: center; }
+        .close-btn { width: 100%; padding: 10px; background: var(--primary-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>User Management Panel</h1>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="user-table-body">
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="profile-modal">
+        <div class="modal-header">
+            <div class="avatar">👤</div>
+            <h2 id="m-username">Username</h2>
+            <div id="m-role-badge" style="font-size: 12px; background: rgba(255,255,255,0.2); display: inline-block; padding: 2px 10px; border-radius: 10px;">ROLE</div>
+        </div>
+        <div class="modal-body">
+            <div class="info-row"><span class="label">User ID</span><span class="value" id="m-id">#0</span></div>
+            <div class="info-row"><span class="label">Email</span><span class="value" id="m-email">email@example.com</span></div>
+            <div class="info-row"><span class="label">Created At</span><span class="value" id="m-date">Date</span></div>
+            <div class="info-row"><span class="label">Documents</span><span class="value">Active User ✅</span></div>
+        </div>
+        <div class="modal-footer">
+            <button class="close-btn" onclick="hideProfile()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Симулирани данни от твоя Java модел
+    const users = [
+        { id: 1, username: "admin_master", email: "admin@company.com", role: "ADMIN", createdAt: "2023-05-12 10:30" },
+        { id: 2, username: "reviewer_jane", email: "jane.d@service.bg", role: "REVIEWER", createdAt: "2024-01-15 14:20" },
+        { id: 3, username: "author_bob", email: "bob.writer@news.com", role: "AUTHOR", createdAt: "2024-03-20 09:15" }
+    ];
+
+    const tableBody = document.getElementById('user-table-body');
+
+    // Функция за рендиране на таблицата
+    function renderTable() {
+        tableBody.innerHTML = users.map(user => `
+            <tr>
+                <td>#${user.id}</td>
+                <td><strong>${user.username}</strong></td>
+                <td>
+                    <select class="role-select" onchange="updateRole(${user.id}, this.value)">
+                        <option value="READER" ${user.role === 'READER' ? 'selected' : ''}>READER</option>
+                        <option value="REVIEWER" ${user.role === 'REVIEWER' ? 'selected' : ''}>REVIEWER</option>
+                        <option value="AUTHOR" ${user.role === 'AUTHOR' ? 'selected' : ''}>AUTHOR</option>
+                        <option value="ADMIN" ${user.role === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="btn btn-view" onclick="showProfile(${user.id})">View Profile</button>
+                    <button class="btn btn-delete" onclick="deleteUser(${user.id})">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Показване на модала с данни
+    function showProfile(id) {
+        const user = users.find(u => u.id === id);
+        if (user) {
+            document.getElementById('m-username').innerText = user.username;
+            document.getElementById('m-id').innerText = `#${user.id}`;
+            document.getElementById('m-email').innerText = user.email;
+            document.getElementById('m-role-badge').innerText = user.role;
+            document.getElementById('m-date').innerText = user.createdAt;
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+    }
+
+    function hideProfile() {
+        document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    function deleteUser(id) {
+        if(confirm("Are you sure you want to delete this user?")) {
+            alert("User #" + id + " deleted (Admin only action)");
+        }
+    }
+
+    function updateRole(id, role) {
+        console.log(`Updating user ${id} to ${role}`);
+        // Тук би извикал твоя API ендпоинт
+    }
+
+    // Инициализация
+    renderTable();
+
+    // Затваряне при клик извън модала
+    window.onclick = function(event) {
+        const overlay = document.getElementById('modalOverlay');
+        if (event.target == overlay) hideProfile();
+    }
+</script>
+
+</body>
+</html>
