@@ -2,6 +2,7 @@ package com.project.practice.sap.service;
 
 import com.project.practice.sap.dto.DocumentResponseDTO;
 import com.project.practice.sap.exception.DuplicateResourceException;
+import com.project.practice.sap.exception.IllegalStatusException;
 import com.project.practice.sap.model.enums.DocumentStatus;
 import com.project.practice.sap.service.AuditLogService;
 import com.project.practice.sap.exception.ResourceNotFoundException;
@@ -92,14 +93,64 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
-    public DocumentResponseDTO updateDocument(Integer id, String name) {
+    public DocumentResponseDTO updateDocument(Integer id, String name, MultipartFile file) {
         Document document = entityLookup.findDocumentById(id);
+        User currentUser = entityLookup.getCurrentUser();
 
-        if (!document.getName().equals(name) && documentRepository.existsByName(name)) {
-            throw new DuplicateResourceException("A document with name '" + name + "' already exists.");
+        String normalizedName = name != null ? name.trim() : null;
+        boolean hasNameChange = normalizedName != null
+                && !normalizedName.isBlank()
+                && !document.getName().equals(normalizedName);
+
+        boolean hasFileChange = file != null && !file.isEmpty();
+
+        if (!hasNameChange && !hasFileChange) {
+            throw new IllegalArgumentException("Provide a new name and/or upload a new .txt file.");
         }
-        document.setName(name);
-        auditLogService.log(entityLookup.getCurrentUser(), AuditAction.DOCUMENT_UPDATED, AuditEntityType.DOCUMENT, id);
+
+        if (hasNameChange) {
+            if (documentRepository.existsByName(normalizedName)) {
+                throw new DuplicateResourceException(
+                        "A document with name '" + normalizedName + "' already exists."
+                );
+            }
+
+            document.setName(normalizedName);
+            documentRepository.save(document);
+
+            auditLogService.log(
+                    currentUser,
+                    AuditAction.DOCUMENT_UPDATED,
+                    AuditEntityType.DOCUMENT,
+                    document.getId()
+            );
+        }
+
+        if (hasFileChange) {
+            fileStorageService.validateTxtFile(file);
+
+            if (versionRepository.existsByDocumentIdAndStatus(document.getId(), DocumentStatus.UNDER_REVIEW)) {
+                throw new IllegalStatusException(
+                        "A version is already pending review for this document. " +
+                                "Approve or reject it before uploading a new edited file."
+                );
+            }
+
+            int nextVersionNum = versionRepository.countByDocumentId(document.getId()) + 1;
+            String filePath = fileStorageService.saveFileToDisk(file, document.getId(), nextVersionNum);
+
+            Version savedVersion = versionRepository.save(
+                    entityBuilder.buildVersion(document, currentUser, nextVersionNum, filePath)
+            );
+
+            auditLogService.log(
+                    currentUser,
+                    AuditAction.VERSION_UPLOADED,
+                    AuditEntityType.VERSION,
+                    savedVersion.getId()
+            );
+        }
+
         return dtoMapper.toDocumentDTO(documentRepository.save(document));
     }
 

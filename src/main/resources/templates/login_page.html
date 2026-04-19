@@ -178,13 +178,10 @@
                 <input type="text" class="input" th:field="*{username}" placeholder="Username">
                 <input type="email" class="input" th:field="*{email}" placeholder="Email">
                 <input type="password" class="input" th:field="*{password}" placeholder="Password">
-
-                <select class="input" name="role">
-                    <option value="">Select role</option>
-                    <option value="READER">Reader</option>
-                    <option value="AUTHOR">Author</option>
-                    <option value="ADMIN">Admin</option>
-                </select>
+                <div style="font-size:13px; color:#667085; margin-bottom:10px;">
+                    New accounts are created with <strong>Reader</strong> access.
+                    An administrator can later change your role.
+                </div>
             </div>
             <button class="submit-btn" type="submit">Sign up</button>
         </form>

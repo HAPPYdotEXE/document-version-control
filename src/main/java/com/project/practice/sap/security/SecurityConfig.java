@@ -46,8 +46,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/h2-console/**",
-                                "/api/v1/auth/**",
-                                "/documents/create"
+                                "/api/v1/auth/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

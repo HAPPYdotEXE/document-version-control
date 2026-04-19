@@ -63,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public UserResponseDTO register(User user, String role) {
+    public UserResponseDTO register(User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new DuplicateResourceException("Username already taken: " + user.getUsername());
         }
@@ -72,22 +72,11 @@ public class AuthServiceImpl implements AuthService {
             throw new DuplicateResourceException("Email already registered: " + user.getEmail());
         }
 
-        if (role == null || role.isBlank()) {
-            throw new IllegalArgumentException("Please select a role.");
-        }
-
-        RoleType roleType;
-        try {
-            roleType = RoleType.valueOf(role.toUpperCase());
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid role selected.");
-        }
-
-        Role selectedRole = roleRepository.findByRoleType(roleType)
-                .orElseThrow(() -> new IllegalStateException("Role not found: " + roleType));
+        Role readerRole = roleRepository.findByRoleType(RoleType.READER)
+                .orElseThrow(() -> new IllegalStateException("Role not found: READER"));
 
         user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(List.of(selectedRole));
+        user.setRoles(List.of(readerRole));
 
         User saved = userRepository.save(user);
         auditLogService.log(saved, AuditAction.USER_CREATED, AuditEntityType.USER, saved.getId());

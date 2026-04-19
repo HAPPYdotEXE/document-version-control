@@ -57,6 +57,13 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(password));
     }
 
+    @Operation(summary = "Change a user's role — ADMIN only")
+    @PutMapping("/{id}/role")
+    public ResponseEntity<UserResponseDTO> changeUserRole(@PathVariable Integer id,
+                                                          @RequestParam String role) {
+        return ResponseEntity.ok(userService.changeUserRole(id, role));
+    }
+
     // only ADMINs can access this endpoint
     @Operation(summary = "Delete a user by ID — ADMIN only")
     @DeleteMapping("/{id}")

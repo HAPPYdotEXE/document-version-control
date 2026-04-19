@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Document</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .modal {
+            background-color: #ffffff;
+            width: 430px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-top: 8px solid #007bff;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            color: #333;
+            margin: 0;
+            font-size: 22px;
+        }
+
+        p {
+            color: #777;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .id-field {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: all 0.3s;
+            outline: none;
+            font-size: 15px;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.1);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .save-btn {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .cancel-btn {
+            background-color: #f1f1f1;
+            color: #555;
+        }
+
+        .cancel-btn:hover {
+            background-color: #e2e2e2;
+        }
+
+        .message {
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .error {
+            background: #ffe2e2;
+            color: #a30000;
+        }
+
+        .success {
+            background: #e4f8ea;
+            color: #0f7a3c;
+        }
+
+        .hint {
+            color: #666;
+            font-size: 12px;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="modal">
+    <div class="modal-header">
+        <h2>✏️ Edit Document</h2>
+        <p>Rename the document and optionally upload a new edited file</p>
+    </div>
+
+    <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="message success" th:text="${successMessage}"></div>
+
+    <form th:action="@{/documents/{id}/edit(id=${document.id})}" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="doc-id">Document ID</label>
+            <input type="text" id="doc-id" class="id-field" th:value="${document.id}" readonly>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Document Name</label>
+            <input type="text" id="name" name="name" th:value="${document.name}" placeholder="Enter new name..." required>
+        </div>
+
+        <div class="form-group">
+            <label for="file">Edited File (.txt)</label>
+            <input type="file" id="file" name="file" accept=".txt">
+            <div class="hint">
+                If you upload a new file, it will become a new version with status UNDER_REVIEW.
+                The current active version stays visible until a reviewer approves the new one.
+            </div>
+        </div>
+
+        <div class="actions">
+            <a th:href="@{/}" class="btn cancel-btn">Cancel</a>
+            <button class="btn save-btn" type="submit">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

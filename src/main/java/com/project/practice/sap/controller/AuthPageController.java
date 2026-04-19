@@ -48,7 +48,6 @@ public class AuthPageController {
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") User user,
                                BindingResult bindingResult,
-                               @RequestParam("role") String role,
                                Model model,
                                RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
@@ -57,14 +56,17 @@ public class AuthPageController {
         }
 
         try {
-            authService.register(user, role);
+            authService.register(user);
         } catch (DuplicateResourceException | IllegalArgumentException ex) {
             model.addAttribute("registerError", ex.getMessage());
             model.addAttribute("mode", "register");
             return "login_page";
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Registration successful. You can now log in.");
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Registration successful. Your account was created with READER access."
+        );
         return "redirect:/login";
     }
 

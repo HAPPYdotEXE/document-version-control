@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Document Versions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #eef3f8;
+            color: #1f2937;
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .header-card {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .title {
+            font-size: 34px;
+            font-weight: 800;
+            color: #123b6d;
+            margin: 0 0 10px 0;
+        }
+
+        .subtitle {
+            color: #667085;
+            margin: 0;
+            font-size: 15px;
+        }
+
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 18px;
+            font-size: 14px;
+            color: #475467;
+        }
+
+        .message {
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #eafaf1;
+            color: #1e7e34;
+            border: 1px solid #b7ebc6;
+        }
+
+        .error {
+            background: #fff1f1;
+            color: #b42318;
+            border: 1px solid #f1b5b5;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8fafc;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 16px 14px;
+            border-bottom: 1px solid #eaecf0;
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        th {
+            color: #344054;
+            font-weight: 700;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-approved {
+            background: #e7f6ec;
+            color: #157347;
+        }
+
+        .badge-review {
+            background: #fff4e5;
+            color: #b54708;
+        }
+
+        .badge-rejected {
+            background: #ffe8e8;
+            color: #b42318;
+        }
+
+        .badge-archived {
+            background: #eef2f6;
+            color: #475467;
+        }
+
+        .badge-active {
+            background: #dbeafe;
+            color: #1d4ed8;
+            margin-left: 8px;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 220px;
+        }
+
+        .btn-link,
+        .btn {
+            display: inline-block;
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .btn-download {
+            background: #eef4ff;
+            color: #1d4ed8;
+        }
+
+        .btn-approve {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-reject {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-back {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .comment-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1px solid #d0d5dd;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .footer-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .muted {
+            color: #667085;
+        }
+
+        .empty {
+            padding: 30px;
+            text-align: center;
+            color: #667085;
+        }
+
+        @media (max-width: 950px) {
+            .table-card {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 1050px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+
+    <div th:if="${successMessage}" class="message success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}"></div>
+
+    <div class="header-card">
+        <h1 class="title">Versions for <span th:text="${document.name}">Document Name</span></h1>
+        <p class="subtitle">Review document history, download files, and approve or reject pending versions.</p>
+
+        <div class="meta">
+            <div><strong>Document ID:</strong> <span th:text="${document.id}">1</span></div>
+            <div><strong>Owner:</strong> <span th:text="${document.createdBy != null ? document.createdBy.username : 'Unknown'}">owner</span></div>
+            <div><strong>Created at:</strong>
+                <span th:text="${document.createdAt != null ? #temporals.format(document.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">date</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-actions" th:if="${canUploadVersion}">
+        <a th:href="@{/documents/{id}/edit(id=${document.id})}" class="btn-link btn-back">
+            Upload new version / Edit document
+        </a>
+    </div>
+
+    <div class="table-card">
+        <table th:if="${versions != null and !versions.isEmpty()}">
+            <thead>
+            <tr>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Created by</th>
+                <th>Created at</th>
+                <th>Reviewed by</th>
+                <th>Review comment</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="version : ${versions}">
+                <td>
+                    <strong th:text="'v' + ${version.versionNum}">v1</strong>
+                    <span th:if="${version.isActive}" class="badge badge-active">ACTIVE</span>
+                </td>
+
+                <td>
+                    <span th:if="${version.status.name() == 'APPROVED'}" class="badge badge-approved">APPROVED</span>
+                    <span th:if="${version.status.name() == 'UNDER_REVIEW'}" class="badge badge-review">UNDER REVIEW</span>
+                    <span th:if="${version.status.name() == 'REJECTED'}" class="badge badge-rejected">REJECTED</span>
+                    <span th:if="${version.status.name() == 'ARCHIVED'}" class="badge badge-archived">ARCHIVED</span>
+                </td>
+
+                <td th:text="${version.createdBy != null ? version.createdBy.username : 'Unknown'}">creator</td>
+
+                <td th:text="${version.createdAt != null ? #temporals.format(version.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">date</td>
+
+                <td th:text="${version.reviewedBy != null ? version.reviewedBy.username : '-'}">reviewer</td>
+
+                <td th:text="${version.reviewComment != null and !#strings.isEmpty(version.reviewComment) ? version.reviewComment : '-'}">comment</td>
+
+                <td>
+                    <div class="actions">
+                        <a class="btn-link btn-download"
+                           th:href="@{/documents/{documentId}/versions/{versionNum}/download(documentId=${document.id}, versionNum=${version.versionNum})}">
+                            Download file
+                        </a>
+
+                        <div th:if="${canReview and version.status.name() == 'UNDER_REVIEW'}">
+                            <form th:action="@{/documents/{documentId}/versions/{versionNum}/approve(documentId=${document.id}, versionNum=${version.versionNum})}"
+                                  method="post"
+                                  style="margin-bottom:10px;">
+                                <input class="comment-input" type="text" name="comment" placeholder="Approval comment (optional)">
+                                <button class="btn btn-approve" type="submit" style="width:100%; margin-top:8px;">Approve</button>
+                            </form>
+
+                            <form th:action="@{/documents/{documentId}/versions/{versionNum}/reject(documentId=${document.id}, versionNum=${version.versionNum})}"
+                                  method="post">
+                                <input class="comment-input" type="text" name="comment" placeholder="Rejection comment (optional)">
+                                <button class="btn btn-reject" type="submit" style="width:100%; margin-top:8px;">Reject</button>
+                            </form>
+                        </div>
+
+                        <div th:if="${!canReview and version.status.name() == 'UNDER_REVIEW'}" class="muted">
+                            Pending reviewer action
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${versions == null or versions.isEmpty()}" class="empty">
+            No versions found for this document.
+        </div>
+    </div>
+
+    <div class="footer-actions">
+        <a th:href="@{/documents/{id}/view(id=${document.id})}" class="btn-link btn-back">View active version</a>
+        <a th:href="@{/}" class="btn-link btn-back">Back to homepage</a>
+    </div>
+
+</div>
+
+</body>
+</html>

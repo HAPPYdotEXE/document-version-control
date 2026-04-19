@@ -33,6 +33,12 @@ public class HomeController {
         model.addAttribute("isLoggedIn", isLoggedIn);
 
         boolean canCreateDocuments = false;
+        boolean canEditDocuments = false;
+        boolean canDeleteDocuments = false;
+        boolean canViewVersions = false;
+        boolean canReviewVersions = false;
+        boolean canManageUsers = false;
+        String currentRole = "GUEST";
 
         if (isLoggedIn) {
             User user = userRepository.findByUsername(authentication.getName()).orElse(null);
@@ -41,13 +47,18 @@ public class HomeController {
                 model.addAttribute("currentUsername", user.getUsername());
                 model.addAttribute("currentEmail", user.getEmail());
 
-                String currentRole =
+                currentRole =
                         user.getRoles() != null && !user.getRoles().isEmpty()
                                 ? user.getRoles().get(0).getRoleType().name()
                                 : "User";
 
                 model.addAttribute("currentRole", currentRole);
                 canCreateDocuments = "AUTHOR".equals(currentRole) || "ADMIN".equals(currentRole);
+                canEditDocuments = "AUTHOR".equals(currentRole) || "ADMIN".equals(currentRole);
+                canDeleteDocuments = "ADMIN".equals(currentRole);
+                canViewVersions = "AUTHOR".equals(currentRole) || "REVIEWER".equals(currentRole) || "ADMIN".equals(currentRole);
+                canReviewVersions = "REVIEWER".equals(currentRole) || "ADMIN".equals(currentRole);
+                canManageUsers = "ADMIN".equals(currentRole);
             }
         }
 
@@ -61,6 +72,11 @@ public class HomeController {
         }
 
         model.addAttribute("canCreateDocuments", canCreateDocuments);
+        model.addAttribute("canEditDocuments", canEditDocuments);
+        model.addAttribute("canDeleteDocuments", canDeleteDocuments);
+        model.addAttribute("canViewVersions", canViewVersions);
+        model.addAttribute("canReviewVersions", canReviewVersions);
+        model.addAttribute("canManageUsers", canManageUsers);
 
         return "index";
     }

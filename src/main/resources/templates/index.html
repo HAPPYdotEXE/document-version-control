@@ -593,6 +593,10 @@
                     <a href="#">My Profile</a>
                     <a href="#">My Documents</a>
                     <a href="#">Settings</a>
+                    <a th:if="${currentRole != null and currentRole == 'ADMIN'}"
+                       th:href="@{/admin/users}">
+                        Admin Panel
+                    </a>
 
                     <form class="logout-form" th:action="@{/logout}" method="post">
                         <button type="submit" class="logout-btn">Logout</button>
@@ -679,20 +683,45 @@
 
             <div class="doc-actions">
                 <div class="doc-actions-top">
-                    <a class="edit-btn action-btn"
+
+                    <a th:if="${canEditDocuments}"
+                       class="edit-btn action-btn"
                        th:href="@{/documents/{id}/edit(id=${doc.id})}">
                         Edit
                     </a>
 
-                    <a class="version-btn action-btn"
+                    <button th:unless="${canEditDocuments}"
+                            class="edit-btn action-btn"
+                            type="button"
+                            onclick="showNoPermissionPopup()">
+                        Edit
+                    </button>
+
+                    <a th:if="${canViewVersions}"
+                       class="version-btn action-btn"
                        th:href="@{/documents/{id}/versions(id=${doc.id})}">
                         Versions
                     </a>
 
-                    <a class="delete-btn action-btn"
+                    <button th:unless="${canViewVersions}"
+                            class="version-btn action-btn"
+                            type="button"
+                            onclick="showNoPermissionPopup()">
+                        Versions
+                    </button>
+
+                    <a th:if="${canDeleteDocuments}"
+                       class="delete-btn action-btn"
                        th:href="@{/documents/{id}/delete(id=${doc.id})}">
                         Delete
                     </a>
+
+                    <button th:unless="${canDeleteDocuments}"
+                            class="delete-btn action-btn"
+                            type="button"
+                            onclick="showNoPermissionPopup()">
+                        Delete
+                    </button>
                 </div>
 
                 <a th:if="${isLoggedIn}"
@@ -720,7 +749,7 @@
 <div id="noPermissionModal" class="custom-modal">
     <div class="custom-modal-content">
         <h3>Access denied</h3>
-        <p>You do not have permission to create documents.</p>
+        <p>You do not have permission to perform this action.</p>
         <button type="button" class="modal-close-btn" onclick="closeNoPermissionPopup()">OK</button>
     </div>
 </div>
