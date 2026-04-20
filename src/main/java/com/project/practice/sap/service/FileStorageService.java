@@ -15,6 +15,10 @@ import java.nio.file.Path;
 public class FileStorageService {
 
     public void validateTxtFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new InvalidFileException("Please choose a non-empty .txt file.");
+        }
+
         String originalName = file.getOriginalFilename();
         if (originalName == null || !originalName.toLowerCase().endsWith(".txt")) {
             throw new InvalidFileException("Only .txt files are accepted. Received: " + originalName);

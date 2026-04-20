@@ -4,6 +4,7 @@ import com.project.practice.sap.dto.AuthResponse;
 import com.project.practice.sap.dto.LoginRequest;
 import com.project.practice.sap.dto.UserResponseDTO;
 import com.project.practice.sap.exception.DuplicateResourceException;
+import com.project.practice.sap.model.Role;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.enums.AuditAction;
 import com.project.practice.sap.model.enums.AuditEntityType;
@@ -19,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -60,19 +63,35 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public UserResponseDTO register(User user) {
+    public UserResponseDTO register(User user, String role) {
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new DuplicateResourceException("Username already taken: " + user.getUsername());
         }
+
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new DuplicateResourceException("Email already registered: " + user.getEmail());
         }
 
+        if (role == null || role.isBlank()) {
+            throw new IllegalArgumentException("Please select a role.");
+        }
+
+        RoleType roleType;
+        try {
+            roleType = RoleType.valueOf(role.toUpperCase());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid role selected.");
+        }
+
+        Role selectedRole = roleRepository.findByRoleType(roleType)
+                .orElseThrow(() -> new IllegalStateException("Role not found: " + roleType));
+
         user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(roleRepository.findByRoleType(RoleType.READER).stream().toList());
+        user.setRoles(List.of(selectedRole));
 
         User saved = userRepository.save(user);
         auditLogService.log(saved, AuditAction.USER_CREATED, AuditEntityType.USER, saved.getId());
+
         return dtoMapper.toUserDTO(saved);
     }
 }

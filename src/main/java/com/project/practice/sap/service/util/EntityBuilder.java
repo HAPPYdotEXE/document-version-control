@@ -38,4 +38,16 @@ public class EntityBuilder {
         entry.setEntityId(entityId);
         return entry;
     }
+
+    public Version buildInitialApprovedVersion(Document document, User createdBy, int versionNum, String filePath) {
+        Version version = new Version();
+        version.setDocument(document);
+        version.setCreatedBy(createdBy);
+        version.setVersionNum(versionNum);
+        version.setStatus(DocumentStatus.APPROVED);
+        version.setActive(true);
+        version.setFilePath(filePath);
+        version.setReviewComment("Initial version automatically approved.");
+        return version;
+    }
 }

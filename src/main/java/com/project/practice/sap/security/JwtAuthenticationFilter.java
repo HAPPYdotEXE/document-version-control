@@ -2,6 +2,7 @@ package com.project.practice.sap.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,12 +49,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Reads the Authorization header and returns the raw token string or null for non-authenticated requests
     private String extractToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        //non-authenticated request -> passes the request to the next filer as unauthenticated
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return null;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
         }
-        // Strip the "Bearer " prefix to get the raw token string
-        return authHeader.substring(7);
+
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 
     // Validates the token and builds the authentication object; returns null if context is already filled or token is invalid
