@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface DocumentRepository extends JpaRepository<Document, Integer> {
@@ -15,6 +16,8 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
 
     // duplicate check without loading the full entity
     boolean existsByName(String name);
+
+    List<Document> findByCreatedById(Integer createdById);
 
     // set CreatedBy to null if user is deleted
     @Modifying

@@ -9,7 +9,10 @@
 <body>
 
 <div class="modal">
-    <h2>Create Document</h2>
+    <div class="modal-header">
+        <h2>Create Document</h2>
+        <p>Upload a new TXT file and start version tracking for your document.</p>
+    </div>
 
     <div th:if="${successMessage}" class="message success" th:text="${successMessage}"></div>
     <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}"></div>

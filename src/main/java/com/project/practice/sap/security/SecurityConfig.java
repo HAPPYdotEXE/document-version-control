@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 "/register",
                                 "/logout",
                                 "/error",
+                                "/about",
                                 "/images/**",
                                 "/css/**",
                                 "/js/**",

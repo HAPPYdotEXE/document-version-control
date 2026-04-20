@@ -114,7 +114,7 @@ public class DocumentPageController {
         return "document-view";
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     @GetMapping("/documents/{id}/delete")
     public String deleteDocumentPage(@PathVariable Integer id, Model model) {
         DocumentResponseDTO document = documentService.getDocumentById(id);
@@ -122,7 +122,7 @@ public class DocumentPageController {
         return "delete-document";
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     @PostMapping("/documents/{id}/delete")
     public String deleteDocument(@PathVariable Integer id,
                                  RedirectAttributes redirectAttributes) {

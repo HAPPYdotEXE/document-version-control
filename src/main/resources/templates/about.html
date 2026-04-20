@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Sync&Flow</title>
+    <link rel="stylesheet" th:href="@{/css/pages.css}">
+</head>
+<body>
+
+<div class="page-shell">
+    <div class="page-topbar">
+        <a class="back-link" th:href="@{/}">← Back to homepage</a>
+    </div>
+
+    <section class="page-hero">
+        <h1 class="page-title">About Sync&Flow</h1>
+        <p class="page-subtitle">
+            Sync&Flow is a document management and version control system designed to help
+            teams create, review, approve, and organize documents in one clean workflow.
+        </p>
+    </section>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2 class="card-title">What the system does</h2>
+            <p class="card-text">
+                The platform keeps document history, allows controlled uploads of new versions,
+                supports review and approval flow, and helps users always work with the correct
+                active version.
+            </p>
+
+            <ul class="feature-list">
+                <li>Document creation with TXT upload</li>
+                <li>Version history and approval workflow</li>
+                <li>Reviewer comments and status tracking</li>
+                <li>Role-based permissions</li>
+                <li>Audit logging of important actions</li>
+            </ul>
+        </div>
+
+        <div class="card highlight-card">
+            <h2 class="card-title">Why Sync&Flow</h2>
+            <p class="card-text">
+                Instead of editing files manually and losing track of the latest version,
+                users can manage everything in one place with clear roles, safer updates,
+                and visible version history.
+            </p>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Main roles</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Version traceability</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">TXT</div>
+                    <div class="stat-label">Supported format</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="height: 24px;"></div>
+
+    <div class="grid-3">
+        <div class="card">
+            <h3 class="card-title">Authors</h3>
+            <p class="card-text">
+                Create documents, upload new versions, and manage their own content.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Reviewers</h3>
+            <p class="card-text">
+                Approve or reject pending versions and keep content quality under control.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Administrators</h3>
+            <p class="card-text">
+                Manage users, roles, and full system access when administrative control is needed.
+            </p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

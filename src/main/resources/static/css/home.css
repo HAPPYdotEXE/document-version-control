@@ -256,32 +256,14 @@ body {
 
 .toolbar {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 16px;
-    flex-wrap: wrap;
     margin-bottom: 26px;
 }
 
 .toolbar h2 {
     font-size: 26px;
     color: #16324f;
-}
-
-.filters {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.filters input,
-.filters select {
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(0, 102, 204, 0.14);
-    background: rgba(255, 255, 255, 0.92);
-    color: #23415f;
-    font-size: 14px;
 }
 
 .documents-grid {
@@ -308,7 +290,7 @@ body {
     justify-content: space-between;
     align-items: start;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 18px;
 }
 
 .doc-title {
@@ -325,14 +307,6 @@ body {
     font-size: 12px;
     font-weight: 700;
     white-space: nowrap;
-}
-
-.doc-desc {
-    color: #5b7188;
-    font-size: 16px;
-    line-height: 1.45;
-    margin-bottom: 18px;
-    min-height: 52px;
 }
 
 .doc-meta {

@@ -17,6 +17,7 @@ import com.project.practice.sap.repository.VersionRepository;
 import com.project.practice.sap.service.util.DtoMapper;
 import com.project.practice.sap.service.util.EntityBuilder;
 import com.project.practice.sap.service.util.EntityLookup;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,6 +98,8 @@ public class DocumentServiceImpl implements DocumentService {
         Document document = entityLookup.findDocumentById(id);
         User currentUser = entityLookup.getCurrentUser();
 
+        assertAdminOrOwner(currentUser, document, "modify");
+
         String normalizedName = name != null ? name.trim() : null;
         boolean hasNameChange = normalizedName != null
                 && !normalizedName.isBlank()
@@ -159,6 +162,9 @@ public class DocumentServiceImpl implements DocumentService {
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public void deleteDocument(Integer id) {
         Document document = entityLookup.findDocumentById(id);
+        User currentUser = entityLookup.getCurrentUser();
+
+        assertAdminOrOwner(currentUser, document, "delete");
 
         List<Version> versions = versionRepository.findByDocumentIdOrderByCreatedAtAsc(id);
         // deleting the files from the server then removing the entities from the DB
@@ -168,5 +174,19 @@ public class DocumentServiceImpl implements DocumentService {
         }
         documentRepository.delete(document);
         auditLogService.log(entityLookup.getCurrentUser(), AuditAction.DOCUMENT_DELETED, AuditEntityType.DOCUMENT, id);
+    }
+
+    private void assertAdminOrOwner(User currentUser, Document document, String action) {
+        boolean isAdmin = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getRoleType() == com.project.practice.sap.model.enums.RoleType.ADMIN);
+
+        boolean isOwner = document.getCreatedBy() != null
+                && document.getCreatedBy().getId().equals(currentUser.getId());
+
+        if (!isAdmin && !isOwner) {
+            throw new AccessDeniedException(
+                    "You can " + action + " only documents created by you."
+            );
+        }
     }
 }

@@ -19,8 +19,19 @@
     <div class="nav-center">
         <a th:href="@{/}">Home</a>
         <a href="#documents">Documents</a>
-        <a href="#">Upload</a>
-        <a href="#">About</a>
+
+        <a th:if="${canCreateDocuments}"
+           th:href="@{/documents/create}">
+            Upload
+        </a>
+
+        <a th:unless="${canCreateDocuments}"
+           href="javascript:void(0)"
+           onclick="showNoPermissionPopup()">
+            Upload
+        </a>
+
+        <a th:href="@{/about}">About</a>
     </div>
 
     <div class="nav-right">
@@ -42,9 +53,8 @@
                         <span th:text="${currentRole}">User</span>
                     </div>
 
-                    <a href="#">My Profile</a>
-                    <a href="#">My Documents</a>
-                    <a href="#">Settings</a>
+                    <a th:href="@{/profile}">My Profile</a>
+                    <a th:href="@{/my-documents}">My Documents</a>
                     <a th:if="${currentRole != null and currentRole == 'ADMIN'}"
                        th:href="@{/admin/users}">
                         Admin Panel
@@ -95,15 +105,6 @@
 <section class="page-content" id="documents">
     <div class="toolbar">
         <h2>Documents</h2>
-        <div class="filters">
-            <input type="text" placeholder="Filter by title..." disabled>
-            <select disabled>
-                <option>Newest</option>
-            </select>
-            <select disabled>
-                <option>All Types</option>
-            </select>
-        </div>
     </div>
 
     <div th:if="${documents != null and !documents.isEmpty()}" class="documents-grid">
@@ -111,10 +112,6 @@
             <div class="doc-top">
                 <div class="doc-title" th:text="${doc.name}">Document Title</div>
                 <div class="doc-badge">TXT</div>
-            </div>
-
-            <div class="doc-desc">
-                No description available.
             </div>
 
             <div class="doc-meta">
@@ -128,20 +125,20 @@
                 </div>
                 <div>
                     <strong>Versions:</strong>
-                    <span>0</span>
+                    <span th:text="${doc.versionCount}">0</span>
                 </div>
             </div>
 
             <div class="doc-actions">
                 <div class="doc-actions-top">
 
-                    <a th:if="${canEditDocuments}"
+                    <a th:if="${isLoggedIn and (currentRole == 'ADMIN' or (currentRole == 'AUTHOR' and doc.createdBy != null and doc.createdBy.username == currentUsername))}"
                        class="edit-btn action-btn"
                        th:href="@{/documents/{id}/edit(id=${doc.id})}">
                         Edit
                     </a>
 
-                    <button th:unless="${canEditDocuments}"
+                    <button th:unless="${isLoggedIn and (currentRole == 'ADMIN' or (currentRole == 'AUTHOR' and doc.createdBy != null and doc.createdBy.username == currentUsername))}"
                             class="edit-btn action-btn"
                             type="button"
                             onclick="showNoPermissionPopup()">
@@ -161,13 +158,13 @@
                         Versions
                     </button>
 
-                    <a th:if="${canDeleteDocuments}"
+                    <a th:if="${isLoggedIn and (currentRole == 'ADMIN' or (currentRole == 'AUTHOR' and doc.createdBy != null and doc.createdBy.username == currentUsername))}"
                        class="delete-btn action-btn"
                        th:href="@{/documents/{id}/delete(id=${doc.id})}">
                         Delete
                     </a>
 
-                    <button th:unless="${canDeleteDocuments}"
+                    <button th:unless="${isLoggedIn and (currentRole == 'ADMIN' or (currentRole == 'AUTHOR' and doc.createdBy != null and doc.createdBy.username == currentUsername))}"
                             class="delete-btn action-btn"
                             type="button"
                             onclick="showNoPermissionPopup()">

@@ -63,6 +63,7 @@ public class VersionPageController {
         model.addAttribute("versions", versions);
         model.addAttribute("isLoggedIn", isLoggedIn);
         model.addAttribute("canReview", canReview);
+        model.addAttribute("canUploadVersion", canUploadVersion);
 
         return "versions";
     }

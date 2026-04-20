@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Sync&Flow</title>
+    <link rel="stylesheet" th:href="@{/css/pages.css}">
+</head>
+<body>
+
+<div class="page-shell">
+    <div class="page-topbar">
+        <a class="back-link" th:href="@{/}">← Back to homepage</a>
+    </div>
+
+    <section class="page-hero">
+        <div class="profile-banner">
+            <div class="avatar-xl"
+                 th:text="${user.username != null and !#strings.isEmpty(user.username) ? #strings.substring(user.username,0,1).toUpperCase() : 'U'}">
+                U
+            </div>
+
+            <div class="profile-meta">
+                <h2 th:text="${user.username}">Username</h2>
+                <p th:text="${user.email}">email@example.com</p>
+                <span class="role-pill"
+                      th:text="${user.roles != null and !user.roles.isEmpty() ? user.roles[0].roleType.name() : 'NO ROLE'}">
+                    AUTHOR
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <div class="grid-2">
+        <div class="card">
+            <h3 class="card-title">Account Information</h3>
+            <div class="info-grid">
+                <div class="info-row">
+                    <span class="info-label">User ID</span>
+                    <span class="info-value" th:text="${user.id}">1</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">Username</span>
+                    <span class="info-value" th:text="${user.username}">username</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value" th:text="${user.email}">email@example.com</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">Joined</span>
+                    <span class="info-value"
+                          th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">
+                        date
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card highlight-card">
+            <h3 class="card-title">Profile Summary</h3>
+            <p class="card-text">
+                This page gives you a quick overview of your account identity and access level
+                inside Sync&Flow.
+            </p>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number"
+                         th:text="${user.roles != null and !user.roles.isEmpty() ? user.roles[0].roleType.name() : 'N/A'}">
+                        AUTHOR
+                    </div>
+                    <div class="stat-label">Current role</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-number">Active</div>
+                    <div class="stat-label">Account status</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-number">Sync</div>
+                    <div class="stat-label">Workspace</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
