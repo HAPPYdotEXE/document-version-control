@@ -3,6 +3,7 @@ package com.project.practice.sap.controller;
 import com.project.practice.sap.dto.DocumentResponseDTO;
 import com.project.practice.sap.dto.VersionResponseDTO;
 import com.project.practice.sap.service.DocumentService;
+import com.project.practice.sap.service.SecurityService;
 import com.project.practice.sap.service.VersionService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -23,11 +24,14 @@ public class VersionPageController {
 
     private final VersionService versionService;
     private final DocumentService documentService;
+    private final SecurityService securityService;
 
     public VersionPageController(VersionService versionService,
-                                 DocumentService documentService) {
+                                 DocumentService documentService,
+                                 SecurityService securityService) {
         this.versionService = versionService;
         this.documentService = documentService;
+        this.securityService = securityService;
     }
 
     @PreAuthorize("hasAnyRole('AUTHOR', 'REVIEWER', 'ADMIN')")
@@ -36,25 +40,9 @@ public class VersionPageController {
                                Authentication authentication,
                                Model model) {
 
-        boolean isLoggedIn =
-                authentication != null &&
-                        authentication.isAuthenticated() &&
-                        !(authentication instanceof AnonymousAuthenticationToken);
-
-        boolean canReview = false;
-        boolean canUploadVersion = false;
-
-        if (isLoggedIn) {
-            canReview = authentication.getAuthorities().stream()
-                    .anyMatch(a ->
-                            "ROLE_REVIEWER".equals(a.getAuthority()) ||
-                                    "ROLE_ADMIN".equals(a.getAuthority()));
-
-            canUploadVersion = authentication.getAuthorities().stream()
-                    .anyMatch(a ->
-                            "ROLE_AUTHOR".equals(a.getAuthority()) ||
-                                    "ROLE_ADMIN".equals(a.getAuthority()));
-        }
+        boolean isLoggedIn = securityService.isLoggedIn(authentication);
+        boolean canReview = securityService.canReview(authentication);
+        boolean canUploadVersion = securityService.canUploadVersion(authentication);
 
         DocumentResponseDTO document = documentService.getDocumentById(documentId);
         List<VersionResponseDTO> versions = versionService.getVersionHistory(documentId);

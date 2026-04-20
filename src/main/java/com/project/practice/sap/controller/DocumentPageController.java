@@ -4,6 +4,7 @@ import com.project.practice.sap.dto.DocumentResponseDTO;
 import com.project.practice.sap.dto.DocumentViewDTO;
 import com.project.practice.sap.exception.ResourceNotFoundException;
 import com.project.practice.sap.service.DocumentService;
+import com.project.practice.sap.service.SecurityService;
 import com.project.practice.sap.service.VersionService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -18,15 +19,18 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-public class DocumentPageController {
+public class DocumentPageController{
 
     private final DocumentService documentService;
     private final VersionService versionService;
+    private final SecurityService securityService;
 
     public DocumentPageController(DocumentService documentService,
-                                  VersionService versionService) {
+                                  VersionService versionService,
+                                  SecurityService securityService) {
         this.documentService = documentService;
         this.versionService = versionService;
+        this.securityService = securityService;
     }
 
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
@@ -88,10 +92,7 @@ public class DocumentPageController {
     public String viewDocument(@PathVariable Integer id,
                                Model model,
                                Authentication authentication) {
-        boolean isLoggedIn =
-                authentication != null &&
-                        authentication.isAuthenticated() &&
-                        !(authentication instanceof AnonymousAuthenticationToken);
+        boolean isLoggedIn = securityService.isLoggedIn(authentication);
 
         model.addAttribute("isLoggedIn", isLoggedIn);
 

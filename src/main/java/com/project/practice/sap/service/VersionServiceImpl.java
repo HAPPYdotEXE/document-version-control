@@ -10,8 +10,6 @@ import com.project.practice.sap.model.Version;
 import com.project.practice.sap.model.enums.AuditAction;
 import com.project.practice.sap.model.enums.AuditEntityType;
 import com.project.practice.sap.model.enums.DocumentStatus;
-import com.project.practice.sap.repository.DocumentRepository;
-import com.project.practice.sap.repository.UserRepository;
 import com.project.practice.sap.repository.VersionRepository;
 import com.project.practice.sap.service.util.DtoMapper;
 import com.project.practice.sap.service.util.EntityBuilder;
@@ -21,7 +19,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -30,8 +27,6 @@ import java.util.List;
 public class VersionServiceImpl implements VersionService {
 
     private final VersionRepository versionRepository;
-    private final DocumentRepository documentRepository;
-    private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final DtoMapper dtoMapper;
     private final EntityLookup entityLookup;
@@ -39,16 +34,12 @@ public class VersionServiceImpl implements VersionService {
     private final AuditLogService auditLogService;
 
     public VersionServiceImpl(VersionRepository versionRepository,
-                              DocumentRepository documentRepository,
-                              UserRepository userRepository,
                               FileStorageService fileStorageService,
                               DtoMapper dtoMapper,
                               EntityLookup entityLookup,
                               EntityBuilder entityBuilder,
                               AuditLogService auditLogService) {
         this.versionRepository = versionRepository;
-        this.documentRepository = documentRepository;
-        this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
         this.dtoMapper = dtoMapper;
         this.entityLookup = entityLookup;
@@ -170,13 +161,7 @@ public class VersionServiceImpl implements VersionService {
             Resource resource = fileStorageService.loadFileAsResource(version.getFilePath());
             String content = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
-            return new DocumentViewDTO(
-                    version.getDocument().getId(),
-                    version.getDocument().getName(),
-                    version.getVersionNum(),
-                    content,
-                    version.getCreatedAt()
-            );
+            return dtoMapper.toDocumentViewDTO(version, content);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read document content.", e);
         }
