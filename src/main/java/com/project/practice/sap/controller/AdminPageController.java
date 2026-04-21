@@ -31,28 +31,20 @@ public class AdminPageController {
         return "admin-users";
     }
 
-    @PostMapping("/users/{id}/role")
+    @PatchMapping("/users/{id}/role")
     public String changeUserRole(@PathVariable Integer id,
                                  @RequestParam String role,
                                  RedirectAttributes redirectAttributes) {
-        try {
-            userService.changeUserRole(id, role);
-            redirectAttributes.addFlashAttribute("successMessage", "User role updated successfully.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
+        userService.changeUserRole(id, role);
+        redirectAttributes.addFlashAttribute("successMessage", "User role updated successfully.");
         return "redirect:/admin/users";
     }
 
     @PostMapping("/users/{id}/delete")
     public String deleteUser(@PathVariable Integer id,
                              RedirectAttributes redirectAttributes) {
-        try {
-            userService.deleteUser(id);
-            redirectAttributes.addFlashAttribute("successMessage", "User deleted successfully.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
+        userService.deleteUser(id);
+        redirectAttributes.addFlashAttribute("successMessage", "User deleted successfully.");
         return "redirect:/admin/users";
     }
 }

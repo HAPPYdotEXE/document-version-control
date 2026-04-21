@@ -92,6 +92,16 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
+    public List<DocumentResponseDTO> getCurrentUserDocuments() {
+        User currentUser = entityLookup.getCurrentUser();
+
+        return documentRepository.findByCreatedById(currentUser.getId())
+                .stream()
+                .map(dtoMapper::toDocumentDTO)
+                .toList();
+    }
+
+    @Override
     @Transactional
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public DocumentResponseDTO updateDocument(Integer id, String name, MultipartFile file) {

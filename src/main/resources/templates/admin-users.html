@@ -36,6 +36,7 @@
                 <form class="role-form"
                       th:action="@{/admin/users/{id}/role(id=${user.id})}"
                       method="post">
+                    <input type="hidden" name="_method" value="patch" />
                     <select class="role-select" name="role">
                         <option th:each="role : ${roles}"
                                 th:value="${role.name()}"

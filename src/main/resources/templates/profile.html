@@ -24,7 +24,7 @@
                 <h2 th:text="${user.username}">Username</h2>
                 <p th:text="${user.email}">email@example.com</p>
                 <span class="role-pill"
-                      th:text="${user.roles != null and !user.roles.isEmpty() ? user.roles[0].roleType.name() : 'NO ROLE'}">
+                      th:text="${user.roles != null and !user.roles.isEmpty() ? user.roles[0].name() : 'NO ROLE'}">
                     AUTHOR
                 </span>
             </div>
@@ -70,7 +70,7 @@
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-number"
-                         th:text="${user.roles != null and !user.roles.isEmpty() ? user.roles[0].roleType.name() : 'N/A'}">
+                         th:text="${user.roles != null and !user.roles.isEmpty() ? user.roles[0].name() : 'N/A'}">
                         AUTHOR
                     </div>
                     <div class="stat-label">Current role</div>
