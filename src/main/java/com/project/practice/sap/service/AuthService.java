@@ -7,5 +7,5 @@ import com.project.practice.sap.model.User;
 
 public interface AuthService {
     AuthResponse login(LoginRequest request);
-    UserResponseDTO register(User user, String role);
+    UserResponseDTO register(User user);
 }

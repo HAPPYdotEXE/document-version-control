@@ -13,7 +13,9 @@ public interface DocumentService {
 
     List<DocumentResponseDTO> getAllDocuments();
 
-    DocumentResponseDTO updateDocument(Integer id, String name);
+    List<DocumentResponseDTO> getCurrentUserDocuments();
+
+    DocumentResponseDTO updateDocument(Integer id, String name, MultipartFile file);
 
     void deleteDocument(Integer id);
 }

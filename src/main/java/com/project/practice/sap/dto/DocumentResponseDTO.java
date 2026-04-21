@@ -6,5 +6,6 @@ public record DocumentResponseDTO(
         Integer id,
         String name,
         LocalDateTime createdAt,
-        UserSummaryDTO createdBy
+        UserSummaryDTO createdBy,
+        Integer versionCount
 ) {}

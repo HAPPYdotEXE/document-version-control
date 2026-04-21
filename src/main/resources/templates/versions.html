@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Document Versions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/versions.css}">
+</head>
+<body>
+
+<div class="page">
+
+    <div th:if="${successMessage}" class="message success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}"></div>
+
+    <div class="header-card">
+        <h1 class="title">Versions for <span th:text="${document.name}">Document Name</span></h1>
+        <p class="subtitle">Review document history, download files, and approve or reject pending versions.</p>
+
+        <div class="meta">
+            <div><strong>Document ID:</strong> <span th:text="${document.id}">1</span></div>
+            <div><strong>Owner:</strong> <span th:text="${document.createdBy != null ? document.createdBy.username : 'Unknown'}">owner</span></div>
+            <div><strong>Created at:</strong>
+                <span th:text="${document.createdAt != null ? #temporals.format(document.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">date</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-actions" th:if="${canUploadVersion}">
+        <a th:href="@{/documents/{id}/edit(id=${document.id})}" class="btn-link btn-back">
+            Upload new version / Edit document
+        </a>
+    </div>
+
+    <div class="table-card">
+        <table th:if="${versions != null and !versions.isEmpty()}">
+            <thead>
+            <tr>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Created by</th>
+                <th>Created at</th>
+                <th>Reviewed by</th>
+                <th>Review comment</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="version : ${versions}">
+                <td>
+                    <strong th:text="'v' + ${version.versionNum}">v1</strong>
+                    <span th:if="${version.isActive}" class="badge badge-active">ACTIVE</span>
+                </td>
+
+                <td>
+                    <span th:if="${version.status.name() == 'APPROVED'}" class="badge badge-approved">APPROVED</span>
+                    <span th:if="${version.status.name() == 'UNDER_REVIEW'}" class="badge badge-review">UNDER REVIEW</span>
+                    <span th:if="${version.status.name() == 'REJECTED'}" class="badge badge-rejected">REJECTED</span>
+                    <span th:if="${version.status.name() == 'ARCHIVED'}" class="badge badge-archived">ARCHIVED</span>
+                </td>
+
+                <td th:text="${version.createdBy != null ? version.createdBy.username : 'Unknown'}">creator</td>
+
+                <td th:text="${version.createdAt != null ? #temporals.format(version.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">date</td>
+
+                <td th:text="${version.reviewedBy != null ? version.reviewedBy.username : '-'}">reviewer</td>
+
+                <td th:text="${version.reviewComment != null and !#strings.isEmpty(version.reviewComment) ? version.reviewComment : '-'}">comment</td>
+
+                <td>
+                    <div class="actions">
+                        <a class="btn-link btn-download"
+                           th:href="@{/documents/{documentId}/versions/{versionNum}/download(documentId=${document.id}, versionNum=${version.versionNum})}">
+                            Download file
+                        </a>
+
+                        <div th:if="${canReview and version.status.name() == 'UNDER_REVIEW'}">
+                            <form th:action="@{/documents/{documentId}/versions/{versionNum}/approve(documentId=${document.id}, versionNum=${version.versionNum})}"
+                                  method="post"
+                                  style="margin-bottom:10px;">
+                                <input class="comment-input" type="text" name="comment" placeholder="Approval comment (optional)">
+                                <button class="btn btn-approve" type="submit" style="width:100%; margin-top:8px;">Approve</button>
+                            </form>
+
+                            <form th:action="@{/documents/{documentId}/versions/{versionNum}/reject(documentId=${document.id}, versionNum=${version.versionNum})}"
+                                  method="post">
+                                <input class="comment-input" type="text" name="comment" placeholder="Rejection comment (optional)">
+                                <button class="btn btn-reject" type="submit" style="width:100%; margin-top:8px;">Reject</button>
+                            </form>
+                        </div>
+
+                        <div th:if="${!canReview and version.status.name() == 'UNDER_REVIEW'}" class="muted">
+                            Pending reviewer action
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${versions == null or versions.isEmpty()}" class="empty">
+            No versions found for this document.
+        </div>
+    </div>
+
+    <div class="footer-actions">
+        <a th:href="@{/documents/{id}/view(id=${document.id})}" class="btn-link btn-back">View active version</a>
+        <a th:href="@{/}" class="btn-link btn-back">Back to homepage</a>
+    </div>
+
+</div>
+
+</body>
+</html>

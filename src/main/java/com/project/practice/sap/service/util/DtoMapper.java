@@ -1,22 +1,23 @@
 package com.project.practice.sap.service.util;
 
-import com.project.practice.sap.dto.AuditLogResponseDTO;
-import com.project.practice.sap.dto.DocumentResponseDTO;
-import com.project.practice.sap.dto.UserResponseDTO;
-import com.project.practice.sap.dto.UserSummaryDTO;
-import com.project.practice.sap.dto.VersionResponseDTO;
+import com.project.practice.sap.dto.*;
 import com.project.practice.sap.model.AuditLog;
 import com.project.practice.sap.model.Document;
 import com.project.practice.sap.model.User;
 import com.project.practice.sap.model.Version;
 import com.project.practice.sap.model.enums.RoleType;
+import com.project.practice.sap.repository.VersionRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class DtoMapper {
+    private final VersionRepository versionRepository;
 
+    public DtoMapper(VersionRepository versionRepository) {
+        this.versionRepository = versionRepository;
+    }
     public UserResponseDTO toUserDTO(User user) {
         List<RoleType> roleTypes = user.getRoles()
                 .stream()
@@ -42,7 +43,8 @@ public class DtoMapper {
                 document.getId(),
                 document.getName(),
                 document.getCreatedAt(),
-                toUserSummary(document.getCreatedBy())
+                toUserSummary(document.getCreatedBy()),
+                versionRepository.countByDocumentId(document.getId())
         );
     }
 
@@ -69,6 +71,16 @@ public class DtoMapper {
                 toUserSummary(version.getReviewedBy()),
                 version.getReviewComment(),
                 version.getDocument().getId()
+        );
+    }
+
+    public DocumentViewDTO toDocumentViewDTO(Version version, String content) {
+        return new DocumentViewDTO(
+                version.getDocument().getId(),
+                version.getDocument().getName(),
+                version.getVersionNum(),
+                content,
+                version.getCreatedAt()
         );
     }
 }

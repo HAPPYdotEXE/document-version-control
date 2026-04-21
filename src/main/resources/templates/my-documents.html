@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Documents - Sync&Flow</title>
+    <link rel="stylesheet" th:href="@{/css/pages.css}">
+</head>
+<body>
+
+<div class="page-shell">
+    <div class="page-topbar">
+        <a class="back-link" th:href="@{/}">← Back to homepage</a>
+    </div>
+
+    <section class="page-hero">
+        <h1 class="page-title">My Documents</h1>
+        <p class="page-subtitle">
+            A personal view of all documents created by you. Open them, edit them,
+            and check their version history from one place.
+        </p>
+    </section>
+
+    <section>
+        <h2 class="section-title">Your document library</h2>
+
+        <div th:if="${documents != null and !documents.isEmpty()}" class="documents-grid">
+            <div class="doc-card" th:each="doc : ${documents}">
+                <div class="doc-top">
+                    <div class="doc-title" th:text="${doc.name}">Document Name</div>
+                    <div class="doc-badge">TXT</div>
+                </div>
+
+                <div class="doc-desc">
+                    Document created and managed by you inside Sync&Flow.
+                </div>
+
+                <div class="doc-meta">
+                    <div>
+                        <strong>Created at:</strong>
+                        <span th:text="${doc.createdAt != null ? #temporals.format(doc.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">
+                            date
+                        </span>
+                    </div>
+
+                    <div>
+                        <strong>Versions:</strong>
+                        <span th:text="${doc.versionCount}">0</span>
+                    </div>
+                </div>
+
+                <div class="doc-actions">
+                    <a class="action-btn view-btn"
+                       th:href="@{/documents/{id}/view(id=${doc.id})}">
+                        View
+                    </a>
+
+                    <a class="action-btn edit-btn"
+                       th:href="@{/documents/{id}/edit(id=${doc.id})}">
+                        Edit
+                    </a>
+
+                    <a class="action-btn version-btn"
+                       th:href="@{/documents/{id}/versions(id=${doc.id})}">
+                        Versions
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${documents == null or documents.isEmpty()}" class="empty-state">
+            <h3>No documents yet</h3>
+            <p>You have not created any documents so far.</p>
+        </div>
+    </section>
+</div>
+
+</body>
+</html>

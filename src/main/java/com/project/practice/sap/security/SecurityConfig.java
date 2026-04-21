@@ -42,12 +42,12 @@ public class SecurityConfig {
                                 "/register",
                                 "/logout",
                                 "/error",
+                                "/about",
                                 "/images/**",
                                 "/css/**",
                                 "/js/**",
                                 "/h2-console/**",
-                                "/api/v1/auth/**",
-                                "/documents/create"
+                                "/api/v1/auth/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

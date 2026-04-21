@@ -16,5 +16,7 @@ public interface UserService {
 
     UserResponseDTO updateUser(String password);
 
+    UserResponseDTO changeUserRole(Integer userId, String role);
+
     void deleteUser(Integer id);
 }

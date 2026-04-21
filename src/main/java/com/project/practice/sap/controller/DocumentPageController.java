@@ -4,7 +4,9 @@ import com.project.practice.sap.dto.DocumentResponseDTO;
 import com.project.practice.sap.dto.DocumentViewDTO;
 import com.project.practice.sap.exception.ResourceNotFoundException;
 import com.project.practice.sap.service.DocumentService;
+import com.project.practice.sap.service.SecurityService;
 import com.project.practice.sap.service.VersionService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -17,22 +19,27 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-public class DocumentPageController {
+public class DocumentPageController{
 
     private final DocumentService documentService;
     private final VersionService versionService;
+    private final SecurityService securityService;
 
     public DocumentPageController(DocumentService documentService,
-                                  VersionService versionService) {
+                                  VersionService versionService,
+                                  SecurityService securityService) {
         this.documentService = documentService;
         this.versionService = versionService;
+        this.securityService = securityService;
     }
 
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     @GetMapping("/documents/create")
     public String createDocumentPage() {
         return "create-document";
     }
 
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     @PostMapping("/documents/create")
     public String createDocument(@RequestParam String name,
                                  @RequestParam MultipartFile file,
@@ -47,14 +54,45 @@ public class DocumentPageController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    @GetMapping("/documents/{id}/edit")
+    public String editDocumentPage(@PathVariable Integer id,
+                                   Model model,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            DocumentResponseDTO document = documentService.getDocumentById(id);
+            model.addAttribute("document", document);
+            return "edit-document";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/";
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    @PostMapping("/documents/{id}/edit")
+    public String editDocument(@PathVariable Integer id,
+                               @RequestParam String name,
+                               @RequestParam(required = false) MultipartFile file,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            documentService.updateDocument(id, name, file);
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Document updated successfully. If you uploaded a file, a new version is now pending review."
+            );
+            return "redirect:/";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/documents/" + id + "/edit";
+        }
+    }
+
     @GetMapping("/documents/{id}/view")
     public String viewDocument(@PathVariable Integer id,
                                Model model,
                                Authentication authentication) {
-        boolean isLoggedIn =
-                authentication != null &&
-                        authentication.isAuthenticated() &&
-                        !(authentication instanceof AnonymousAuthenticationToken);
+        boolean isLoggedIn = securityService.isLoggedIn(authentication);
 
         model.addAttribute("isLoggedIn", isLoggedIn);
 
@@ -77,6 +115,7 @@ public class DocumentPageController {
         return "document-view";
     }
 
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     @GetMapping("/documents/{id}/delete")
     public String deleteDocumentPage(@PathVariable Integer id, Model model) {
         DocumentResponseDTO document = documentService.getDocumentById(id);
@@ -84,6 +123,7 @@ public class DocumentPageController {
         return "delete-document";
     }
 
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     @PostMapping("/documents/{id}/delete")
     public String deleteDocument(@PathVariable Integer id,
                                  RedirectAttributes redirectAttributes) {
